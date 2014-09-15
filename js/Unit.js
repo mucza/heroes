@@ -1,4 +1,4 @@
-Unit = function(board, position, size, type, key) {
+Unit = function(board, position, size, type) {
 
     this.board = board;
     this.size = size;
@@ -9,7 +9,7 @@ Unit = function(board, position, size, type, key) {
         row: null
     };
 
-    Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y, MyGame().getGame().cache.getBitmapData(key));
+    Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y, MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
 
     this.inputEnabled = true;
     this.events.onDragStop.add(this.board.stopDragUnit, this.board);

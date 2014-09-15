@@ -4,14 +4,12 @@ var board = new Board();
 var myGame = new MyGame(game);
 
 function preload () {
-    var unitColors = new Array('#ff3636', '#87c540', '#357385');
-    var keys = new Array('unitRed', 'unitGreen', 'unitBlue');
+    var types = Config.unit.type;
+    for (var type in types) {
+        Util.addBmpToCache(Config.unit.size, types[type].color, types[type].key, Util.BMP_CIRCLE);
+    }
 
-    keys.forEach( function (key, i) {
-        addUnitBitmapToCache(key, unitColors[i]);
-    });
-
-    board.preload(keys);
+    board.preload();
 }
 
 function create () {
@@ -38,15 +36,4 @@ function callReinforcements(reinforcements) {
     if (total == reinforcements.length) {
         total = 0;
     }
-}
-
-function addUnitBitmapToCache(key, color) {
-    var bmd = game.add.bitmapData(80, 80);
-    bmd.ctx.fillStyle = color;
-    bmd.ctx.beginPath();
-    bmd.ctx.arc(40, 40, 40, 0, Math.PI * 2);
-    bmd.ctx.closePath();
-    bmd.ctx.fill();
-
-    game.cache.addBitmapData(key, bmd);
 }

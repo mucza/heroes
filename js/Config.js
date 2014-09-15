@@ -1,6 +1,24 @@
 var Config = {
     unit: {
-        moveTimePerTile: 150
+        moveTimePerTile: 150,
+        type: {
+            'red': {
+                key: 'unitRed',
+                color: '#ff3636',
+            },
+            'green': {
+                key: 'unitGreen',
+                color: '#87c540',
+            },
+            'blue': {
+                key: 'unitBlue',
+                color: '#357385',
+            }
+        },
+        size: {
+            width: 80,
+            height: 80
+        }
     },
     board: {
         maxUnits: 5,
@@ -8,7 +26,9 @@ var Config = {
         height: 6
     },
     tile: {
-        width: 80,
-        height: 80
+        size: {
+            width: 80,
+            height: 80
+        }
     }
 }

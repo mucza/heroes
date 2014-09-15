@@ -7,7 +7,6 @@ Board = function() {
         tileBmp1: 'tile1',
         tileBmp2: 'tile2'
     };
-    this.unitBmpKeys = {};
 
     this.columns = [];
     this.highlightedColumnIndex = null;
@@ -17,11 +16,9 @@ Board = function() {
 
 Board.prototype = {
 
-    preload: function(unitBmpKeys) {
-        this.unitBmpKeys = unitBmpKeys;
-
-        this.addTileBitmapToCache(this.conf.tileBmp1, this.conf.tileColor1);
-        this.addTileBitmapToCache(this.conf.tileBmp2, this.conf.tileColor2);
+    preload: function() {
+        Util.addBmpToCache(Config.tile.size, this.conf.tileColor1, this.conf.tileBmp1, Util.BMP_RECTANGLE);
+        Util.addBmpToCache(Config.tile.size, this.conf.tileColor2, this.conf.tileBmp2, Util.BMP_RECTANGLE);
 
         for (var i = 0; i < Config.board.width; i++) {
 
@@ -39,8 +36,8 @@ Board.prototype = {
 
     drawTile: function(col, row) {
         var key = (((col + row) % 2) == 0) ? this.conf.tileBmp1 : this.conf.tileBmp2;
-        var posX = col * Config.tile.width + this.conf.startX;
-        var posY = row * Config.tile.height + this.conf.startY;
+        var posX = col * Config.tile.size.width + this.conf.startX;
+        var posY = row * Config.tile.size.height + this.conf.startY;
 
         var tile = new Tile(col, row);
         tile.preload(posX, posY, key);
@@ -62,7 +59,7 @@ Board.prototype = {
     },
 
     getColumnIndex: function(unitPosX) {
-        var colIndex = Math.round((unitPosX - this.conf.startX) / Config.tile.width);
+        var colIndex = Math.round((unitPosX - this.conf.startX) / Config.tile.size.width);
         if (colIndex < 0) {
             colIndex = 0;
         } else if (colIndex >= Config.board.width) {
@@ -70,17 +67,6 @@ Board.prototype = {
         }
 
         return colIndex;
-    },
-
-    addTileBitmapToCache: function(key, color) {
-        var game = MyGame().getGame();
-        var bmd = game.add.bitmapData(Config.tile.width, Config.tile.height);
-        bmd.ctx.fillStyle = color;
-        bmd.ctx.beginPath();
-        bmd.ctx.fillRect(0, 0, Config.tile.width, Config.tile.height);
-        bmd.ctx.closePath();
-
-        game.cache.addBitmapData(key, bmd);
     },
 
     stopDragUnit: function(unit) {
@@ -163,7 +149,7 @@ Board.prototype = {
             var colIndex = Util.getRandomElem(availableColumns);
             var column = this.columns[colIndex];
 
-            unitsToCall[colIndex].push(new Unit(this, column.getStartPosition(), 1, 1, Util.getRandomElem(this.unitBmpKeys)));
+            unitsToCall[colIndex].push(new Unit(this, column.getStartPosition(), 1, Util.getRandomKey(Config.unit.type)));
 
             columnsFill[colIndex]++;
             if (columnsFill[colIndex] == columnsMaxFill[colIndex]) {
