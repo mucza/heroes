@@ -4,15 +4,15 @@ var Config = {
         type: {
             'red': {
                 key: 'unitRed',
-                color: '#ff3636',
+                color: '#ff3636'
             },
             'green': {
                 key: 'unitGreen',
-                color: '#87c540',
+                color: '#87c540'
             },
             'blue': {
                 key: 'unitBlue',
-                color: '#357385',
+                color: '#357385'
             }
         },
         size: {
@@ -26,6 +26,16 @@ var Config = {
         height: 6
     },
     tile: {
+        type: {
+            0: {
+                key: 'tile1',
+                color: '#262f38'
+            },
+            1: {
+                key: 'tile2',
+                color: '#fdbd63'
+            }
+        },
         size: {
             width: 80,
             height: 80

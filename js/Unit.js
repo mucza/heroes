@@ -9,7 +9,8 @@ Unit = function(board, position, size, type) {
         row: null
     };
 
-    Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y, MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
+    Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y,
+        MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
 
     this.inputEnabled = true;
     this.events.onDragStop.add(this.board.stopDragUnit, this.board);

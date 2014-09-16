@@ -6,8 +6,23 @@ Column = function(index) {
 
 Column.prototype = {
 
-    addTile: function(tile, index) {
-        this.tiles[index] = tile;
+    addTiles: function(boardPosition) {
+        for (var i = 0; i < Config.board.height; i++) {
+            var tile = this.drawTile(i, boardPosition);
+            this.tiles.push(tile);
+        }
+    },
+
+    drawTile: function(row, boardPosition) {
+        var col = this.index;
+        var key = Config.tile.type[(col + row) % 2].key;
+        var posX = col * Config.tile.size.width + boardPosition.x;
+        var posY = row * Config.tile.size.height + boardPosition.y;
+
+        var tile = new Tile(col, row);
+        tile.preload(posX, posY, key);
+
+        return tile;
     },
 
     getTile: function(index) {
@@ -49,7 +64,7 @@ Column.prototype = {
 
     getStartPosition: function() {
         var startPosition = this.tiles[0].getPosition();
-        startPosition.y -= 80;
+        startPosition.y -= Config.tile.size.height;
 
         return startPosition;
     },

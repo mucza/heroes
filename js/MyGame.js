@@ -43,6 +43,24 @@ function MyGame(game) {
                 break;
         }
     }
+
+    var _currentPlayer = this.constructor.PLAYER_1;
+
+    this.getCurrentPlayer = function() {
+        return _currentPlayer;
+    }
+
+    var _boards = [];
+
+    this.initBoards = function() {
+        var board = new Board();
+        board.preload();
+        _boards.push(board);
+    }
+
+    this.getBoard = function() {
+        return _boards[_currentPlayer];
+    }
 }
 
 MyGame.STATE_PLAYER = 1;
@@ -50,3 +68,6 @@ MyGame.STATE_MOVE = 2;
 MyGame.STATE_REINF = 3;
 MyGame.STATE_REINF_MOVE = 4;
 MyGame.STATE_DRAG = 5;
+
+MyGame.PLAYER_1 = 0;
+MyGame.PLAYER_2 = 1;

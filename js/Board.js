@@ -1,11 +1,8 @@
 Board = function() {
-    this.conf = {
-        startX: 80,
-        startY: 80,
-        tileColor1: '#262f38',
-        tileColor2: '#fdbd63',
-        tileBmp1: 'tile1',
-        tileBmp2: 'tile2'
+
+    this.position = {
+        x: 80,
+        y: 80
     };
 
     this.columns = [];
@@ -17,32 +14,19 @@ Board = function() {
 Board.prototype = {
 
     preload: function() {
-        Util.addBmpToCache(Config.tile.size, this.conf.tileColor1, this.conf.tileBmp1, Util.BMP_RECTANGLE);
-        Util.addBmpToCache(Config.tile.size, this.conf.tileColor2, this.conf.tileBmp2, Util.BMP_RECTANGLE);
+        var tiles = Config.tile.type;
+        for (var key in tiles) {
+            var tile = tiles[key];
+            Util.addBmpToCache(Config.tile.size, tile.color, tile.key, Util.BMP_RECTANGLE);
+        }
 
         for (var i = 0; i < Config.board.width; i++) {
 
             this.columns[i] = new Column(i);
-
-            for (var j = 0; j < Config.board.height; j++) {
-
-                var tile = this.drawTile(i, j);
-                this.columns[i].addTile(tile, j);
-            }
+            this.columns[i].addTiles(this.position);
         }
 
         this.addReinforcementsButton();
-    },
-
-    drawTile: function(col, row) {
-        var key = (((col + row) % 2) == 0) ? this.conf.tileBmp1 : this.conf.tileBmp2;
-        var posX = col * Config.tile.size.width + this.conf.startX;
-        var posY = row * Config.tile.size.height + this.conf.startY;
-
-        var tile = new Tile(col, row);
-        tile.preload(posX, posY, key);
-
-        return tile;
     },
 
     unitDragged: function(unit) {
@@ -59,7 +43,7 @@ Board.prototype = {
     },
 
     getColumnIndex: function(unitPosX) {
-        var colIndex = Math.round((unitPosX - this.conf.startX) / Config.tile.size.width);
+        var colIndex = Math.round((unitPosX - this.position.x) / Config.tile.size.width);
         if (colIndex < 0) {
             colIndex = 0;
         } else if (colIndex >= Config.board.width) {
