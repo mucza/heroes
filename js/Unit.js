@@ -1,4 +1,4 @@
-Unit = function(board, position, size, type) {
+Unit = function(position, size, type) {
 
     this.board = board;
     this.size = size;
@@ -13,9 +13,10 @@ Unit = function(board, position, size, type) {
         MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
 
     this.inputEnabled = true;
-    this.events.onDragStop.add(this.board.stopDragUnit, this.board);
-    this.events.onDragStart.add(this.board.startDragUnit, this.board);
-    this.events.onInputDown.add(this.board.unitClick, this.board);
+    var board = MyGame().getBoard();
+    this.events.onDragStop.add(board.stopDragUnit, board);
+    this.events.onDragStart.add(board.startDragUnit, board);
+    this.events.onInputDown.add(board.unitClick, board);
     //this.game.add.existing(this);
 }
 
@@ -28,7 +29,7 @@ Unit.prototype.show = function() {
 
 Unit.prototype.update = function() {
     if (this.input.isDragged) {
-        this.board.unitDragged(this);
+        MyGame().getBoard().unitDragged(this);
     }
 };
 
@@ -52,7 +53,8 @@ Unit.prototype.moveToTile = function(tile) {
     var tween = MyGame().getGame().add.tween(this).to(tile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
     this.setTilePosition(tile);
 
-    tween.onComplete.add(this.board.stopMoveUnit, this.board);
+    var board = MyGame().getBoard();
+    tween.onComplete.add(board.stopMoveUnit, board);
 };
 
 Unit.prototype.disableDrag = function() {

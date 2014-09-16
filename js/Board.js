@@ -9,6 +9,7 @@ Board = function() {
     this.highlightedColumnIndex = null;
 
     this.calledUnitsCount = 0;
+    this.reinforcement = new Reinforcement();
 }
 
 Board.prototype = {
@@ -80,10 +81,10 @@ Board.prototype = {
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
             if (--this.calledUnitsCount == 0) {
-                MyGame().setState(MyGame.STATE_PLAYER, this);
+                myGame.setState(MyGame.STATE_PLAYER, this);
             }
         } else {
-            MyGame().setState(MyGame.STATE_PLAYER, this);
+            myGame.setState(MyGame.STATE_PLAYER, this);
         }
     },
 
@@ -95,83 +96,6 @@ Board.prototype = {
 
     unitClick: function(unit) {
         console.log('click');
-    },
-
-    initReinforcements: function() {
-        var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_PLAYER) {
-            myGame.setState(MyGame.STATE_REINF, this);
-        }
-    },
-
-    prepareReinforcements: function() {
-        var unitToCallCount = this.getUnitsToCallCount();
-        var columnsFill = [];
-        var columnsMaxFill = [];
-        var availableColumns = [];
-        var unitsToCall = [];
-
-        for (var i = 0; i < Config.board.width; i++) {
-            var freeTiles = this.columns[i].getFreeTilesFromTop();
-            if (freeTiles > 0) {
-                unitsToCall[i] = [];
-                availableColumns.push(i);
-            } else {
-                unitsToCall[i] = null;
-            }
-
-            columnsFill.push(0);
-            columnsMaxFill.push(freeTiles);
-        }
-
-        for (var j = 0; j < unitToCallCount; j++) {
-
-            if (availableColumns.length == 0) {
-                break;
-            }
-
-            var colIndex = Util.getRandomElem(availableColumns);
-            var column = this.columns[colIndex];
-
-            unitsToCall[colIndex].push(new Unit(this, column.getStartPosition(), 1, Util.getRandomKey(Config.unit.type)));
-
-            columnsFill[colIndex]++;
-            if (columnsFill[colIndex] == columnsMaxFill[colIndex]) {
-                var index = availableColumns.indexOf(colIndex);
-                availableColumns.splice(index, 1);
-            }
-        }
-
-        var maxRows = Util.maxFromArray(columnsFill);
-        var rowsToCall = [];
-
-        for (var row = 0; row < maxRows; row++) {
-            rowToCall = [];
-            unitsToCall.forEach( function (col, i) {
-                if (col != null && row in col) {
-                    rowToCall.push(col[row]);
-                    this.calledUnitsCount++;
-                } else {
-                    rowToCall.push(null);
-                }
-            }, this);
-
-
-            rowsToCall.push(rowToCall);
-        }
-
-        Config.board.maxUnits += 10;
-
-        return rowsToCall;
-    },
-
-    callReinforcements: function(reinforcementsLine) {
-        reinforcementsLine.forEach( function (unit, index) {
-            if (unit != null) {
-                unit.show();
-                this.columns[index].moveUnit(unit);
-            }
-        }, this);
     },
 
     getUnitsToCallCount: function() {
@@ -186,6 +110,30 @@ Board.prototype = {
         }
 
         return result;
+    },
+
+    initReinforcements: function() {
+        var myGame = MyGame();
+        if (myGame.getState() == MyGame.STATE_PLAYER) {
+            myGame.setState(MyGame.STATE_REINF, this);
+        }
+    },
+
+    callReinforcements: function(reinforcementsLine) {
+        reinforcementsLine.forEach( function (unit, index) {
+            if (unit != null) {
+                unit.show();
+                this.columns[index].moveUnit(unit);
+            }
+        }, this);
+    },
+
+    prepareReinforcements: function() {
+        var unitsToCallCount = this.getUnitsToCallCount();
+        var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
+        this.calledUnitsCount = this.reinforcement.getCalledUnitsCount();
+
+        return unitsToCall;
     },
 
     addReinforcementsButton: function() {
