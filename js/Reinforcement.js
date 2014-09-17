@@ -50,7 +50,7 @@ Reinforcement.prototype = {
         var rowsToCall = [];
 
         for (var row = 0; row < maxRows; row++) {
-            rowToCall = [];
+            var rowToCall = [];
             unitsToCall.forEach( function (col, i) {
                 if (col != null && row in col) {
                     rowToCall.push(col[row]);
@@ -64,10 +64,14 @@ Reinforcement.prototype = {
             rowsToCall.push(rowToCall);
         }
 
-        console.log(unitsToCall);
+        //console.log(unitsToCall);
 
         Config.board.maxUnits += 10;
 
         return rowsToCall;
+    },
+
+    verticalValidation: function() {
+
     }
 }

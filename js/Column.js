@@ -78,6 +78,15 @@ Column.prototype = {
         return this.highlightedTile != null;
     },
 
+    getUnits: function() {
+        var units = [];
+        this.tiles.forEach(function (tile) {
+            units.push(tile.getUnit());
+        });
+
+        return units;
+    },
+
     setUnitsDragable: function(enableDrag) {
         var firstTileWithUnit = true;
         this.tiles.forEach( function (tile) {

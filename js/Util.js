@@ -62,3 +62,26 @@ Util.getBmpRectangle = function(bmd, size) {
 
     return bmd;
 };
+
+Util.debugUnits = function(units) {
+    var debugRaws = [];
+    for (var i = 0; i < Config.board.height; i++) {
+        debugRaws[i] = '';
+    }
+
+    units.forEach(function (unitsCol) {
+        unitsCol.forEach(function (unit, index){
+            if (unit != null) {
+                debugRaws[index] += 'X ';
+            } else {
+                debugRaws[index] += '_ ';
+            }
+        });
+    });
+
+    console.log('----------');
+    debugRaws.forEach(function (raw) {
+        console.log(raw);
+    });
+    console.log('----------');
+};

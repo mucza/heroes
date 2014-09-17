@@ -1,6 +1,6 @@
 Unit = function(position, size, type) {
 
-    this.board = board;
+    this.board = MyGame().getBoard();
     this.size = size;
     this.type = type;
 
@@ -13,11 +13,9 @@ Unit = function(position, size, type) {
         MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
 
     this.inputEnabled = true;
-    var board = MyGame().getBoard();
-    this.events.onDragStop.add(board.stopDragUnit, board);
-    this.events.onDragStart.add(board.startDragUnit, board);
-    this.events.onInputDown.add(board.unitClick, board);
-    //this.game.add.existing(this);
+    this.events.onDragStop.add(this.board.stopDragUnit, this.board);
+    this.events.onDragStart.add(this.board.startDragUnit, this.board);
+    this.events.onInputDown.add(this.board.unitClick, this.board);
 }
 
 Unit.prototype = Object.create(Phaser.Sprite.prototype);
@@ -29,8 +27,12 @@ Unit.prototype.show = function() {
 
 Unit.prototype.update = function() {
     if (this.input.isDragged) {
-        MyGame().getBoard().unitDragged(this);
+        this.board.unitDragged(this);
     }
+};
+
+Unit.prototype.getType = function() {
+    return this.type;
 };
 
 Unit.prototype.setPosition = function(position) {
@@ -53,8 +55,7 @@ Unit.prototype.moveToTile = function(tile) {
     var tween = MyGame().getGame().add.tween(this).to(tile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
     this.setTilePosition(tile);
 
-    var board = MyGame().getBoard();
-    tween.onComplete.add(board.stopMoveUnit, board);
+    tween.onComplete.add(this.board.stopMoveUnit, this.board);
 };
 
 Unit.prototype.disableDrag = function() {

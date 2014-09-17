@@ -128,7 +128,17 @@ Board.prototype = {
         }, this);
     },
 
+    createUnitsArray: function() {
+        var units = [];
+        this.columns.forEach( function (column) {
+            units.push(column.getUnits());
+        });
+
+        return units;
+    },
+
     prepareReinforcements: function() {
+        Util.debugUnits(this.createUnitsArray());
         var unitsToCallCount = this.getUnitsToCallCount();
         var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
         this.calledUnitsCount = this.reinforcement.getCalledUnitsCount();
