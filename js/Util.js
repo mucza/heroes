@@ -11,17 +11,46 @@ Util.getRandomElem = function(arr) {
     return arr[rand];
 };
 
-Util.getRandomKey = function(obj) {
-    var arr = [];
-    for (var key in obj) {
-        arr.push(key);
+
+Util.getUnitTypes = function() {
+    var types = [];
+    for (type in Config.unit.type) {
+        types.push(type);
     }
 
-    return Util.getRandomElem(arr);
+    return types;
 };
 
 Util.maxFromArray = function(arr) {
     return Math.max.apply(Math, arr);
+};
+
+/**
+ * second param could be value or array of values
+ */
+Util.removeValuesFromArray = function(arr, values) {
+    if (values == null) {
+        return arr;
+    }
+
+    if (typeof values != 'object') {
+        values = [values];
+    }
+
+    values.forEach( function(value) {
+        if (value != null) {
+            var index = arr.indexOf(value);
+            if (index > -1) {
+                arr.splice(index, 1);
+            }
+        }
+    });
+
+    return arr;
+};
+
+Util.cloneArray = function(arr) {
+    return arr.slice(0);
 };
 
 Util.BMP_CIRCLE = 1;
@@ -71,17 +100,27 @@ Util.debugUnits = function(units) {
 
     units.forEach(function (unitsCol) {
         unitsCol.forEach(function (unit, index){
+            var sign;
             if (unit != null) {
-                debugRaws[index] += 'X ';
+                switch (unit.getType()) {
+                    case 'red':
+                        sign = 'R'; break;
+                    case 'blue':
+                        sign = 'B'; break;
+                    case 'green':
+                        sign = 'G'; break;
+                }
             } else {
-                debugRaws[index] += '_ ';
+                sign =  '_';
             }
+
+            debugRaws[index] += sign + ' ';
         });
     });
 
     console.log('----------');
-    debugRaws.forEach(function (raw) {
-        console.log(raw);
+    debugRaws.forEach(function (raw, i) {
+        console.log(i + ' ' + raw);
     });
     console.log('----------');
 };

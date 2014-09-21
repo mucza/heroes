@@ -114,7 +114,7 @@ Board.prototype = {
 
     initReinforcements: function() {
         var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_PLAYER) {
+        if (myGame.getState() == MyGame.STATE_PLAYER && this.getUnitsToCallCount() > 0) {
             myGame.setState(MyGame.STATE_REINF, this);
         }
     },
@@ -140,7 +140,7 @@ Board.prototype = {
     prepareReinforcements: function() {
         Util.debugUnits(this.createUnitsArray());
         var unitsToCallCount = this.getUnitsToCallCount();
-        var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
+        var unitsToCall = this.reinforcement.prepare(this.columns, this.createUnitsArray(), unitsToCallCount);
         this.calledUnitsCount = this.reinforcement.getCalledUnitsCount();
 
         return unitsToCall;

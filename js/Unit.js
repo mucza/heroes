@@ -2,7 +2,7 @@ Unit = function(position, size, type) {
 
     this.board = MyGame().getBoard();
     this.size = size;
-    this.type = type;
+    this._type = type;
 
     this.tilePosition = {
         column: null,
@@ -32,7 +32,7 @@ Unit.prototype.update = function() {
 };
 
 Unit.prototype.getType = function() {
-    return this.type;
+    return this._type;
 };
 
 Unit.prototype.setPosition = function(position) {
