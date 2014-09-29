@@ -8,7 +8,7 @@ Reinforcement.prototype = {
         return this.calledUnitsCount;
     },
 
-    prepare: function(columns, units, unitToCallCount) {
+    prepare: function(columns, unitToCallCount) {
         this.calledUnitsCount = 0;
         var columnsFill = [];
         var columnsMaxFill = [];
@@ -37,10 +37,11 @@ Reinforcement.prototype = {
             var colIndex = Util.getRandomElem(availableColumns);
             var column = columns[colIndex];
 
-            var unitTypes = this.unitValidation(units, unitsToCall, colIndex);
-            //console.log(colIndex, unitTypes);
+            var unitTypes = this.unitValidation(columns, colIndex);
 
-            unitsToCall[colIndex].push(new Unit(column.getStartPosition(), 1, Util.getRandomElem(unitTypes)));
+            var newUnit = new Unit(column.getStartPosition(), 1, Util.getRandomElem(unitTypes));
+            unitsToCall[colIndex].push(newUnit);
+            column.setReinforcementUnit(newUnit);
 
             columnsFill[colIndex]++;
             if (columnsFill[colIndex] == columnsMaxFill[colIndex]) {
@@ -66,8 +67,6 @@ Reinforcement.prototype = {
             rowsToCall.push(rowToCall);
         }
 
-        //console.log(unitsToCall);
-
         Config.board.maxUnits += 25;
 
         return rowsToCall;
@@ -77,43 +76,45 @@ Reinforcement.prototype = {
      * checks which units color can be dropped for given column
      * returns array with acceptable unit colors
      */
-    unitValidation: function(units, unitsToCall, colIndex) {
+    unitValidation: function(columns, colIndex) {
         var types = Util.getUnitTypes();
-        var excludedType = this.verticalValidation(units, unitsToCall, colIndex);
-        var excludedTypes = this.horizontalValidation(units, unitsToCall, colIndex);
+        var excludedType = this.verticalValidation(columns, colIndex);
+        var excludedTypes = this.horizontalValidation(columns, colIndex);
         excludedTypes.push(excludedType);
 
-        return Util.removeValuesFromArray(types, excludedTypes);
+       return Util.removeValuesFromArray(types, excludedTypes);
     },
 
     /*
      * return color that cannot be dropped
      */
-    verticalValidation: function(units, unitsToCall, colIndex) {
-        var combinedUnits = this.applyNewUnits(units[colIndex], unitsToCall[colIndex]);
-        if (combinedUnits.length < 2) {
+    verticalValidation: function(columns, colIndex) {
+        var column = columns[colIndex];
+        var firstFreeIndex = column.getFirstFreeTileIndex();
+        if (Config.board.height - firstFreeIndex < 3) {
             return null;
         }
 
-        if (combinedUnits[0].getType() != combinedUnits[1].getType()) {
+        //TODO: need to change for bigger units
+        if (column.getUnit(firstFreeIndex + 1).getType() != column.getUnit(firstFreeIndex + 2).getType()) {
             return null;
         }
 
-        return combinedUnits[0].getType();
+        return column.getUnit(firstFreeIndex + 1).getType();
     },
 
     /*
      * return colors that cannot be dropped
      */
-    horizontalValidation: function(units, unitsToCall, colIndex) {
-        var combinedUnits = this.applyNewUnits(units[colIndex], unitsToCall[colIndex]);
-        var raw = combinedUnits.length;
+    horizontalValidation: function(columns, colIndex) {
+        var column = columns[colIndex];
+        var firstFreeIndex = column.getFirstFreeTileIndex();
 
         var leftCols = this.getLeftColNeighbors(colIndex, 2);
         var rightCols = this.getRightColNeighbors(colIndex, 2);
 
-        var leftUnits = this.getHorizontalNeighbors(units, unitsToCall, leftCols, raw, 2);
-        var rightUnits = this.getHorizontalNeighbors(units, unitsToCall, rightCols, raw, 2);
+        var leftUnits = this.getHorizontalNeighbors(columns, leftCols, firstFreeIndex, 2);
+        var rightUnits = this.getHorizontalNeighbors(columns, rightCols, firstFreeIndex, 2);
 
         var types = [];
         types.push(this.matchUnitsType(leftUnits[0], leftUnits[1]));
@@ -132,17 +133,12 @@ Reinforcement.prototype = {
         return null;
     },
 
-    getHorizontalNeighbors: function(units, unitsToCall, columnsIndexes, raw, max) {
+    getHorizontalNeighbors: function(columns, columnsIndexes, row, max) {
         var neighborUnits = [];
-        for (var i = 0; i < columnsIndexes.length; i++) {
-            var colIndex = columnsIndexes[i];
-            var combinedUnits = this.applyNewUnits(units[colIndex], unitsToCall[colIndex]).reverse();
-            if (combinedUnits.length > raw) {
-                neighborUnits.push(combinedUnits[raw])
-            } else {
-                neighborUnits.push(null);
-            }
-        }
+
+        columnsIndexes.forEach( function(colIndex) {
+            neighborUnits.push(columns[colIndex].getUnit(row));
+        });
 
         if (max - columnsIndexes.length > 0) {
             for (var j = 0; j < max - columnsIndexes.length; j++) {
@@ -151,28 +147,6 @@ Reinforcement.prototype = {
         }
 
         return neighborUnits;
-    },
-
-    applyNewUnits: function(unitsColumn, unitsToCallColumn) {
-        var unitsColumnClone = Util.cloneArray(unitsColumn);
-        var unitsToCallColumnClone = [];
-        if (unitsToCallColumn != null) {
-            unitsToCallColumnClone = Util.cloneArray(unitsToCallColumn);
-        }
-
-        var spliceCount = 0;
-        unitsColumnClone.forEach(function (unit) {
-            if (unit == null) {
-                spliceCount++;
-            } else {
-                return;
-            }
-        });
-
-        unitsColumnClone.splice(0, spliceCount);
-
-        unitsToCallColumnClone.reverse();
-        return unitsToCallColumnClone.concat(unitsColumnClone)
     },
 
     getLeftColNeighbors: function(colIndex, range) {

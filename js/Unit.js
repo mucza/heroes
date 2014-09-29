@@ -4,10 +4,8 @@ Unit = function(position, size, type) {
     this.size = size;
     this._type = type;
 
-    this.tilePosition = {
-        column: null,
-        row: null
-    };
+    this.tile = null;
+    this.destinationTile = null;
 
     Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y,
         MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
@@ -41,19 +39,22 @@ Unit.prototype.setPosition = function(position) {
 };
 
 Unit.prototype.getTilePosition = function() {
-    return this.tilePosition;
+    return this.tile.getPositionOnBoard();
 };
 
-Unit.prototype.setTilePosition = function(tile) {
-    this.tilePosition.column = tile.getColumnIndex();
-    this.tilePosition.row = tile.getIndex();
+Unit.prototype.setDestinationTile = function(tile) {
+    this.destinationTile = tile;
 };
 
-Unit.prototype.moveToTile = function(tile) {
-    var fallingTime = (tile.getIndex() + 1) * Config.unit.moveTimePerTile;
-
-    var tween = MyGame().getGame().add.tween(this).to(tile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
-    this.setTilePosition(tile);
+Unit.prototype.moveToTile = function() {
+    var startRow = 0;
+    if (this.tile != null && this.tile.getColumnIndex() == this.destinationTile.getColumnIndex()) {
+        startRow = this.getTilePosition().row + 1;
+    }
+    var tilesToMove = (this.destinationTile.getIndex() + 1) - startRow;
+    var fallingTime = tilesToMove * Config.unit.moveTimePerTile;
+    var tween = MyGame().getGame().add.tween(this).to(this.destinationTile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
+    this.tile = this.destinationTile;
 
     tween.onComplete.add(this.board.stopMoveUnit, this.board);
 };

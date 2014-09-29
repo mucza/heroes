@@ -92,7 +92,12 @@ Util.getBmpRectangle = function(bmd, size) {
     return bmd;
 };
 
-Util.debugUnits = function(units) {
+Util.debugUnits = function(columns) {
+    var units = [];
+    columns.forEach( function (column) {
+        units.push(column.getUnits());
+    });
+
     var debugRaws = [];
     for (var i = 0; i < Config.board.height; i++) {
         debugRaws[i] = '';

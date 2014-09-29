@@ -1,7 +1,8 @@
 Column = function(index) {
     this.index = index;
     this.tiles = [];
-    this.highlightedTile = null;
+    this.units = [];
+    this.highlightedTileIndex = null;
 }
 
 Column.prototype = {
@@ -10,6 +11,8 @@ Column.prototype = {
         for (var i = 0; i < Config.board.height; i++) {
             var tile = this.drawTile(i, boardPosition);
             this.tiles.push(tile);
+
+            this.units.push(null);
         }
     },
 
@@ -30,36 +33,18 @@ Column.prototype = {
     },
 
     highlightOn: function() {
-        var tile = this.getFirstFreeTile();
-
-        if (tile != null) {
-            tile.highlight(true);
-            this.highlightedTile = tile;
+        var tileIndex = this.getFirstFreeTileIndex();
+        if (tileIndex != null) {
+            var tile = this.tiles[tileIndex].highlight(true);
+            this.highlightedTileIndex = tileIndex;
         }
     },
 
     highlightOff: function() {
-        if (this.highlightedTile != null) {
-            this.highlightedTile.highlight(false);
-            this.highlightedTile = null;
+        if (this.highlightedTileIndex != null) {
+            this.tiles[this.highlightedTileIndex].highlight(false);
+            this.highlightedTileIndex = null;
         }
-    },
-
-    moveUnit: function(unit) {
-        var destinationTile;
-        //when moving unit (drag&drop)
-        if (this.highlightedTile != null) {
-            destinationTile = this.highlightedTile;
-            unit.setPosition(this.getStartPosition());
-        }
-        //when calling reinforcements
-        else {
-            destinationTile = this.getFirstFreeTile();
-        }
-
-        destinationTile.setUnit(unit);
-
-        unit.moveToTile(destinationTile);
     },
 
     getStartPosition: function() {
@@ -75,27 +60,78 @@ Column.prototype = {
             return false;
         }
 
-        return this.highlightedTile != null;
+        return this.highlightedTileIndex != null;
     },
 
     getUnits: function() {
-        var units = [];
-        this.tiles.forEach(function (tile) {
-            units.push(tile.getUnit());
-        });
+        return this.units;
+    },
 
-        return units;
+    unsetUnit: function(index) {
+        this.units[index] = null;
+    },
+
+    setUnit: function(unit, index) {
+        unit.setDestinationTile(this.tiles[index]);
+        this.units[index] = unit;
+    },
+
+    setReinforcementUnit: function(unit) {
+        var index = this.getFirstFreeTileIndex();
+        this.setUnit(unit, index);
+    },
+
+    setDroppedUnit: function(unit) {
+        var index = this.highlightedTileIndex;
+        this.setUnit(unit, index);
+
+        unit.setPosition(this.getStartPosition());
+        unit.moveToTile();
+    },
+
+    getUnit: function(index) {
+        return this.units[index];
+    },
+
+    unitKilled: function(unit) {
+        var index = unit.getTilePosition().row;
+        var unitsAbove = this.getUnitsAbove(index);
+        this.unsetUnit(index);
+        unit.destroy();
+
+        unitsAbove.forEach( function(aboveUnit) {
+            var unitRow = aboveUnit.getTilePosition().row;
+            var newRow = this.getFirstFreeTileIndex(unitRow + 1);
+            if (newRow == null) {
+                return;
+            }
+
+            this.unsetUnit(unitRow);
+            this.setUnit(aboveUnit, newRow);
+            aboveUnit.moveToTile();
+        }, this);
+    },
+
+    getUnitsAbove: function(index) {
+        var result = [];
+        while (index--) {
+            if (this.units[index] != null) {
+                result.push(this.units[index]);
+            }
+        }
+
+        return result;
     },
 
     setUnitsDragable: function(enableDrag) {
-        var firstTileWithUnit = true;
-        this.tiles.forEach( function (tile) {
-            if (tile.hasUnit()) {
-                if (enableDrag && firstTileWithUnit) {
-                    tile.getUnit().enableDrag();
-                    firstTileWithUnit = false;
+        var firstUnit = true;
+        this.units.forEach( function (unit) {
+            if (unit != null) {
+                if (enableDrag && firstUnit) {
+                    unit.enableDrag();
+                    firstUnit = false;
                 } else {
-                    tile.getUnit().disableDrag();
+                    unit.disableDrag();
                 }
             }
         });
@@ -103,8 +139,8 @@ Column.prototype = {
 
     getUnitsCount: function() {
         var result = 0;
-        this.tiles.forEach( function (tile) {
-            if (tile.hasUnit()) {
+        this.units.forEach( function (unit) {
+            if (unit != null) {
                 result++;
             }
         });
@@ -112,24 +148,26 @@ Column.prototype = {
         return result;
     },
 
-    getFirstFreeTile: function() {
-        var freeTile = null;
-        this.tiles.forEach( function (tile) {
-            if (tile.hasUnit()) {
-                return freeTile;
+    getFirstFreeTileIndex: function(startIndex) {
+        startIndex = startIndex || 0;
+
+        var freeTileIndex = null;
+        this.units.forEach( function (unit, index) {
+            if (index < startIndex || unit != null) {
+                return;
             }
 
-            freeTile = tile;
+            freeTileIndex = index;
         });
 
-        return freeTile;
+        return freeTileIndex;
     },
 
     getFreeTilesFromTop: function() {
         var result = 0;
-        this.tiles.forEach( function (tile) {
-            if (tile.hasUnit()) {
-                return result;
+        this.units.forEach( function (unit) {
+            if (unit != null) {
+                return;
             }
 
             result++;

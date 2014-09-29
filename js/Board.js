@@ -28,6 +28,7 @@ Board.prototype = {
         }
 
         this.addReinforcementsButton();
+        this.addKillButton();
     },
 
     unitDragged: function(unit) {
@@ -56,16 +57,17 @@ Board.prototype = {
 
     stopDragUnit: function(unit) {
         var previousTilePosition = unit.getTilePosition();
-        var previousTile = this.columns[previousTilePosition.column].getTile(previousTilePosition.row);
+        var previousColumn = this.columns[previousTilePosition.column];
+        var previousTile = previousColumn.getTile(previousTilePosition.row);
 
         var column = this.columns[this.highlightedColumnIndex];
         if (column.canDropUnit(unit)) {
             MyGame().setState(MyGame.STATE_MOVE, this);
-            previousTile.setUnit(null);
-            column.moveUnit(unit);
+            previousColumn.unsetUnit(previousTilePosition.row);
+            column.setDroppedUnit(unit);
         } else {
-            MyGame().setState(MyGame.STATE_PLAYER, this);
             unit.setPosition(previousTile.getPosition());
+            MyGame().setState(MyGame.STATE_PLAYER, this);
         }
 
         column.highlightOff();
@@ -95,7 +97,14 @@ Board.prototype = {
     },
 
     unitClick: function(unit) {
-        console.log('click');
+        var myGame = MyGame();
+        if (myGame.getState() == MyGame.STATE_KILL) {
+
+            var column = this.columns[unit.getTilePosition().column];
+            column.unitKilled(unit);
+
+            //myGame.setState(MyGame.STATE_PLAYER, this);
+        }
     },
 
     getUnitsToCallCount: function() {
@@ -120,27 +129,17 @@ Board.prototype = {
     },
 
     callReinforcements: function(reinforcementsLine) {
-        reinforcementsLine.forEach( function (unit, index) {
+        reinforcementsLine.forEach( function (unit) {
             if (unit != null) {
                 unit.show();
-                this.columns[index].moveUnit(unit);
+                unit.moveToTile();
             }
-        }, this);
-    },
-
-    createUnitsArray: function() {
-        var units = [];
-        this.columns.forEach( function (column) {
-            units.push(column.getUnits());
         });
-
-        return units;
     },
 
     prepareReinforcements: function() {
-        Util.debugUnits(this.createUnitsArray());
         var unitsToCallCount = this.getUnitsToCallCount();
-        var unitsToCall = this.reinforcement.prepare(this.columns, this.createUnitsArray(), unitsToCallCount);
+        var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
         this.calledUnitsCount = this.reinforcement.getCalledUnitsCount();
 
         return unitsToCall;
@@ -158,5 +157,26 @@ Board.prototype = {
 
         var callUnitsKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         callUnitsKey.onDown.add(this.initReinforcements, this);
-    }
+    },
+
+    setKillState: function() {
+        var myGame = MyGame();
+        if (myGame.getState() == MyGame.STATE_PLAYER) {
+            myGame.setState(MyGame.STATE_KILL, this);
+        }
+        else if (myGame.getState() == MyGame.STATE_KILL) {
+            myGame.setState(MyGame.STATE_PLAYER, this);
+        }
+    },
+
+    addKillButton: function() {
+        var game = MyGame().getGame();
+        var buttonBmp = game.add.bitmapData(40, 40);
+        buttonBmp.ctx.beginPath();
+        buttonBmp.ctx.rect(0, 0, 40, 40);
+        buttonBmp.ctx.fillStyle = '#ffff00';
+        buttonBmp.ctx.fill();
+
+        game.add.button(740, 180, buttonBmp, this.setKillState, this);
+    },
 };

@@ -41,6 +41,11 @@ function MyGame(game) {
             case this.constructor.STATE_DRAG:
                 _state = this.constructor.STATE_DRAG;
                 break;
+
+            case this.constructor.STATE_KILL:
+                _state = this.constructor.STATE_KILL;
+                board.setUnitsDragable(false);
+                break;
         }
     }
 
@@ -68,6 +73,7 @@ MyGame.STATE_MOVE = 2;
 MyGame.STATE_REINF = 3;
 MyGame.STATE_REINF_MOVE = 4;
 MyGame.STATE_DRAG = 5;
+MyGame.STATE_KILL = 6;
 
 MyGame.PLAYER_1 = 0;
 MyGame.PLAYER_2 = 1;

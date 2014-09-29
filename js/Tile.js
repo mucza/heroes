@@ -3,7 +3,6 @@ Tile = function(columnIndex, index) {
     var _index = index;
 
     this.sprite = null;
-    this.unit = null;
 
     this.conf = {
         highlightColor: 0xff00ff
@@ -34,23 +33,11 @@ Tile.prototype = {
         this.sprite.tint = color;
     },
 
-    getUnit: function() {
-        return this.unit;
-    },
-
-    setUnit: function(unit) {
-        this.unit = unit;
-    },
-
-    hasUnit: function() {
-        if (this.unit == null) {
-            return false;
-        }
-
-        return true;
-    },
-
     getPosition: function() {
         return {x: this.sprite.x, y: this.sprite.y};
+    },
+
+    getPositionOnBoard: function() {
+        return {column: this.getColumnIndex(), row: this.getIndex()};
     }
 };
