@@ -20,7 +20,7 @@ function render() {
         var reinforcements = myGame.getBoard().prepareReinforcements();
 
         game.time.events.repeat(Config.unit.moveTimePerTile, reinforcements.length, callReinforcements, this, reinforcements);
-        myGame.setState(MyGame.STATE_REINF_MOVE, myGame.getBoard());
+        myGame.setState(MyGame.STATE_MOVE, myGame.getBoard());
     }
 
     game.debug.text(myGame.getState(), 740, 300);

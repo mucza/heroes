@@ -8,7 +8,7 @@ Board = function() {
     this.columns = [];
     this.highlightedColumnIndex = null;
 
-    this.calledUnitsCount = 0;
+    this.unitsToMoveCount = 0;
     this.reinforcement = new Reinforcement();
 }
 
@@ -63,6 +63,7 @@ Board.prototype = {
         var column = this.columns[this.highlightedColumnIndex];
         if (column.canDropUnit(unit)) {
             MyGame().setState(MyGame.STATE_MOVE, this);
+            this.unitsToMoveCount = 1;
             previousColumn.unsetUnit(previousTilePosition.row);
             column.setDroppedUnit(unit);
         } else {
@@ -81,12 +82,14 @@ Board.prototype = {
     /*stop move after drag&drop and after reinforcement call*/
     stopMoveUnit: function(unit) {
         var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
-            if (--this.calledUnitsCount == 0) {
+        if (myGame.getState() == MyGame.STATE_MOVE) {
+            if (--this.unitsToMoveCount == 0) {
+
+                //maybe there should be separate state for reinf call moving
+                //for no to check units connections after reinf call
+
                 myGame.setState(MyGame.STATE_PLAYER, this);
             }
-        } else {
-            myGame.setState(MyGame.STATE_PLAYER, this);
         }
     },
 
@@ -101,9 +104,12 @@ Board.prototype = {
         if (myGame.getState() == MyGame.STATE_KILL) {
 
             var column = this.columns[unit.getTilePosition().column];
-            column.unitKilled(unit);
-
-            //myGame.setState(MyGame.STATE_PLAYER, this);
+            this.unitsToMoveCount = column.unitKilled(unit);
+            if (this.unitsToMoveCount == 0) {
+                myGame.setState(MyGame.STATE_PLAYER, this);
+            } else {
+                myGame.setState(MyGame.STATE_MOVE, this);
+            }
         }
     },
 
@@ -140,7 +146,7 @@ Board.prototype = {
     prepareReinforcements: function() {
         var unitsToCallCount = this.getUnitsToCallCount();
         var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
-        this.calledUnitsCount = this.reinforcement.getCalledUnitsCount();
+        this.unitsToMoveCount = this.reinforcement.getCalledUnitsCount();
 
         return unitsToCall;
     },
@@ -163,8 +169,7 @@ Board.prototype = {
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_PLAYER) {
             myGame.setState(MyGame.STATE_KILL, this);
-        }
-        else if (myGame.getState() == MyGame.STATE_KILL) {
+        } else if (myGame.getState() == MyGame.STATE_KILL) {
             myGame.setState(MyGame.STATE_PLAYER, this);
         }
     },
@@ -178,5 +183,8 @@ Board.prototype = {
         buttonBmp.ctx.fill();
 
         game.add.button(740, 180, buttonBmp, this.setKillState, this);
+
+        var killKey = game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
+        killKey.onDown.add(this.setKillState, this);
     },
 };

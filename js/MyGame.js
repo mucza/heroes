@@ -33,11 +33,6 @@ function MyGame(game) {
                 _state = this.constructor.STATE_REINF;
                 break;
 
-            case this.constructor.STATE_REINF_MOVE:
-                _state = this.constructor.STATE_REINF_MOVE;
-                board.setUnitsDragable(false);
-                break;
-
             case this.constructor.STATE_DRAG:
                 _state = this.constructor.STATE_DRAG;
                 break;
@@ -71,9 +66,8 @@ function MyGame(game) {
 MyGame.STATE_PLAYER = 1;
 MyGame.STATE_MOVE = 2;
 MyGame.STATE_REINF = 3;
-MyGame.STATE_REINF_MOVE = 4;
-MyGame.STATE_DRAG = 5;
-MyGame.STATE_KILL = 6;
+MyGame.STATE_DRAG = 4;
+MyGame.STATE_KILL = 5;
 
 MyGame.PLAYER_1 = 0;
 MyGame.PLAYER_2 = 1;

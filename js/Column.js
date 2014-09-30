@@ -35,7 +35,7 @@ Column.prototype = {
     highlightOn: function() {
         var tileIndex = this.getFirstFreeTileIndex();
         if (tileIndex != null) {
-            var tile = this.tiles[tileIndex].highlight(true);
+            this.tiles[tileIndex].highlight(true);
             this.highlightedTileIndex = tileIndex;
         }
     },
@@ -110,6 +110,8 @@ Column.prototype = {
             this.setUnit(aboveUnit, newRow);
             aboveUnit.moveToTile();
         }, this);
+
+        return unitsAbove.length;
     },
 
     getUnitsAbove: function(index) {

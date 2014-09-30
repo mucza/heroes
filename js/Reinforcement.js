@@ -82,7 +82,7 @@ Reinforcement.prototype = {
         var excludedTypes = this.horizontalValidation(columns, colIndex);
         excludedTypes.push(excludedType);
 
-       return Util.removeValuesFromArray(types, excludedTypes);
+        return Util.removeValuesFromArray(types, excludedTypes);
     },
 
     /*
