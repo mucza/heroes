@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, render: render });
+var game = new Phaser.Game(1200, 600, Phaser.AUTO, '', { preload: preload, create: create, render: render });
 
 var myGame = new MyGame(game);
 
@@ -9,9 +9,14 @@ function preload () {
     }
 
     myGame.initBoards();
+
+    game.load.image('particle', 'img/particle.png');
 }
 
 function create () {
+
+    // var emitter = Util.getEmitter();
+    // emitter.start(false, 1000, 50);
 }
 
 function render() {
@@ -20,7 +25,7 @@ function render() {
         var reinforcements = myGame.getBoard().prepareReinforcements();
 
         game.time.events.repeat(Config.unit.moveTimePerTile, reinforcements.length, callReinforcements, this, reinforcements);
-        myGame.setState(MyGame.STATE_MOVE, myGame.getBoard());
+        myGame.setState(MyGame.STATE_REINF_MOVE, myGame.getBoard());
     }
 
     game.debug.text(myGame.getState(), 740, 300);

@@ -63,6 +63,14 @@ Column.prototype = {
         return this.highlightedTileIndex != null;
     },
 
+    moveUnits: function() {
+        this.units.forEach( function(unit) {
+            if (unit != null) {
+                unit.moveToTile();
+            }
+        });
+    },
+
     getUnits: function() {
         return this.units;
     },
@@ -176,5 +184,89 @@ Column.prototype = {
         });
 
         return result;
+    },
+
+    searchAttackConnections: function() {
+        var i = this.units.length;
+        var counter = 0;
+        var type = null;
+        while (--i >= 0) {
+            var unit = this.units[i];
+            if (unit == null || !unit.isIdle()) {
+                counter = 0;
+                type = null;
+            } else {
+                if (type == unit.getType()) {
+                    counter++;
+                } else {
+                    type = unit.getType();
+                    counter = 1;
+                }
+            }
+
+            if (counter == 3) {
+                //return {type: 1, unitType: type, column: this.index, start: i};
+                return new Connection(Connection.TRIPLE_ATTACK, type, i, this.index);
+            }
+        }
+
+        return null;
+    },
+
+    reorderByUnitsWeight: function() {
+		var needChange = true;
+		while (needChange) {
+			needChange = false;
+			var lastWeight = Unit.STATE_IDLE;
+			var lastIndex;
+
+			for (var i = 0; i < this.units.length; i++) {
+				var unit = this.units[i];
+				if (unit != null) {
+					var weight = unit.getState();
+
+					if (weight < lastWeight) {
+						//console.log('move ' + lastIndex, lastWeight, i, weight);
+						this.moveUnitDown(lastIndex);
+						needChange = true;
+						break;
+					}
+
+					lastWeight = weight;
+					lastIndex = i;
+				}
+			}
+		}
+
+        this.moveUnits();
+    },
+
+    moveUnitDown: function(index) {
+        var heavierUnit = this.units[index];
+        var lighterUnit = this.units[index + 1];
+        if (heavierUnit.isTripleAttack()) {
+            this.moveTripleUnitDown(index);
+            this.setUnit(lighterUnit, index - 2);
+
+        } else {
+            this.moveOneUnitDown(index);
+            this.setUnit(lighterUnit, index);
+        }
+    },
+
+    moveOneUnitDown: function(index) {
+        var unit = this.units[index];
+        this.unsetUnit(index);
+        this.setUnit(unit, index + 1);
+    },
+
+    moveTripleUnitDown: function(index) {
+        var unit = this.units[index];
+
+        var units = unit.getAllUnits();
+        units.forEach( function (u) {
+            var row = u.getTilePosition().row;
+            this.moveOneUnitDown(row);
+        }, this);
     }
 };

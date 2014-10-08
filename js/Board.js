@@ -85,12 +85,81 @@ Board.prototype = {
         if (myGame.getState() == MyGame.STATE_MOVE) {
             if (--this.unitsToMoveCount == 0) {
 
-                //maybe there should be separate state for reinf call moving
-                //for no to check units connections after reinf call
+                this.searchConnections();
 
+                Util.debugUnits(this.columns);
+                myGame.setState(MyGame.STATE_PLAYER, this);
+            }
+        } else if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
+            if (--this.unitsToMoveCount == 0) {
                 myGame.setState(MyGame.STATE_PLAYER, this);
             }
         }
+    },
+
+    searchConnections: function() {
+		var attConn = this.searchAttackConnections();
+        attConn.forEach( function(connection) {
+            console.log(connection);
+            connection.make(this.columns);
+        }, this);
+
+        var wallConn = this.searchWallConnections();
+        wallConn.forEach( function(connection) {
+            console.log(connection);
+            connection.make(this.columns);
+        }, this);
+
+        this.reorderByUnitsWeight();
+    },
+
+    searchAttackConnections: function() {
+        var connections = [];
+        this.columns.forEach( function(column) {
+            var conn = column.searchAttackConnections();
+            if (conn != null) {
+                connections.push(conn);
+            }
+        });
+
+        return connections;
+    },
+
+	searchWallConnections: function() {
+		var connections = [];
+		for (var i = 0; i < Config.board.height; i++) {
+			var type = null;
+			var counter = 0;
+			var j = Config.board.width;
+			while (--j >= 0) {
+				var unit = this.columns[j].getUnit(i);
+				if (unit == null || !unit.isIdle()) {
+					counter = 0;
+					type = null;
+				} else {
+					if (type == unit.getType()) {
+						counter++;
+					} else {
+						type = unit.getType();
+						counter = 1;
+					}
+				}
+
+				if (counter == 3) {
+					connections.push(new Connection(Connection.WALL, type, i, j, counter));
+				} else if (counter > 3) {
+					connections[connections.length - 1].setLength(counter);
+				}
+			}
+		}
+
+		return connections;
+	},
+
+    reorderByUnitsWeight: function() {
+        this.columns.forEach( function(column) {
+            column.reorderByUnitsWeight();
+        });
     },
 
     setUnitsDragable: function(enableDrag) {
@@ -100,6 +169,12 @@ Board.prototype = {
     },
 
     unitClick: function(unit) {
+		// var row = unit.getTilePosition().row;
+		// this.columns[unit.getTilePosition().column].unsetUnit(row);
+		// this.columns[unit.getTilePosition().column].setUnit(unit, row-1);
+		// unit.moveToTile();
+		// return;
+
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_KILL) {
 

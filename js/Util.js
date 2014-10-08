@@ -92,6 +92,19 @@ Util.getBmpRectangle = function(bmd, size) {
     return bmd;
 };
 
+Util.getEmitter = function(x, y) {
+    var emitter = game.add.emitter(x, y, 200);
+
+    emitter.makeParticles('particle');
+    emitter.setRotation(0, 0);
+    emitter.setAlpha(0.1, 0.2);
+    emitter.minParticleScale = 0.1;
+    emitter.maxParticleScale = 0.2;
+    emitter.gravity = -500;
+
+    return emitter;
+}
+
 Util.debugUnits = function(columns) {
     var units = [];
     columns.forEach( function (column) {
