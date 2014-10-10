@@ -1,4 +1,4 @@
-var game = new Phaser.Game(1200, 600, Phaser.AUTO, '', { preload: preload, create: create, render: render });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, render: render });
 
 var myGame = new MyGame(game);
 
@@ -11,12 +11,10 @@ function preload () {
     myGame.initBoards();
 
     game.load.image('particle', 'img/particle.png');
+    game.load.image('wall', 'img/wall.jpg');
 }
 
 function create () {
-
-    // var emitter = Util.getEmitter();
-    // emitter.start(false, 1000, 50);
 }
 
 function render() {

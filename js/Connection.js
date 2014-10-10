@@ -8,7 +8,8 @@ Connection = function(type, unitType, row, column, length) {
 
 Connection.prototype = {
 
-    setLength: function(length) {
+    correct: function(column, length) {
+        this.column = column;
         this.length = length;
     },
 
@@ -36,7 +37,11 @@ Connection.prototype = {
 
 
     makeWall: function(columns) {
-
+        var i = this.length;
+        while (--i >= 0) {
+            var unit = columns[this.column + i].getUnit(this.row);
+            unit.setState(Unit.STATE_WALL);
+        }
     }
 };
 

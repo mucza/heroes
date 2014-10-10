@@ -3,7 +3,7 @@ Unit = function(position, size, type) {
     this.board = MyGame().getBoard();
     this.size = size;
     this._type = type;
-    this.state = this.constructor.STATE_IDLE;
+    this.state = Unit.STATE_IDLE;
 
     this.master = false;
 
@@ -45,9 +45,9 @@ Unit.prototype.setPosition = function(position) {
  * returns current tile position, returns destination tile if it is already set
  */
 Unit.prototype.getTilePosition = function() {
-	if (this.destinationTile != null && this.destinationTile != this.tile) {
-		return this.destinationTile.getPositionOnBoard();
-	}
+    if (this.destinationTile != null && this.destinationTile != this.tile) {
+        return this.destinationTile.getPositionOnBoard();
+    }
 
     return this.tile.getPositionOnBoard();
 };
@@ -58,7 +58,7 @@ Unit.prototype.setDestinationTile = function(tile) {
 
 Unit.prototype.moveToTile = function() {
     if (this.tile == this.destinationTile ||
-		(this.isTripleAttack() && !this.master)) {
+        (this.isTripleAttack() && !this.master)) {
         return;
     }
 
@@ -87,15 +87,23 @@ Unit.prototype.enableDrag = function() {
 
 Unit.prototype.setState = function(state) {
     this.state = state;
-    if (state == this.constructor.STATE_ATTACK) {
-        var emitter = Util.getEmitter(Config.unit.size.width / 2, Config.unit.size.height - 10);
-        this.addChild(emitter);
-        emitter.start(false, 500, 50);
+    switch (state) {
+        case Unit.STATE_ATTACK:
+            this.events.onInputDown.remove(this.board.unitClick, this.board);
+
+            var emitter = Util.getEmitter(Config.unit.size.width / 2, Config.unit.size.height - 10);
+            this.addChild(emitter);
+            emitter.start(false, 500, 50);
+            break;
+
+        case Unit.STATE_WALL:
+            this.loadTexture('wall');
+            break;
     }
 };
 
 Unit.prototype.isIdle = function() {
-    return this.state == this.constructor.STATE_IDLE;
+    return this.state == Unit.STATE_IDLE;
 };
 
 Unit.prototype.getState = function() {
@@ -104,7 +112,7 @@ Unit.prototype.getState = function() {
 
 //move to other class
 Unit.prototype.isTripleAttack = function() {
-    return this.state == this.constructor.STATE_ATTACK && this.size == 1;
+    return this.state == Unit.STATE_ATTACK && this.size == 1;
 };
 
 Unit.prototype.getAllUnits = function() {
@@ -126,15 +134,15 @@ Unit.prototype.getAllUnits = function() {
 };
 
 Unit.prototype.makeTripleAttack = function(children) {
-	this.master = true;
-	this.setState(this.constructor.STATE_ATTACK);
-	children.forEach( function(child, i){
-		child.setState(this.constructor.STATE_ATTACK);
-		this.addChild(child);
-		//position relative to master unit
-		var y = Config.tile.size.height * -(i + 1);
-		child.setPosition({x: 0, y: y});
-	}, this);
+    this.master = true;
+    this.setState(Unit.STATE_ATTACK);
+    children.forEach( function(child, i){
+        child.setState(Unit.STATE_ATTACK);
+        this.addChild(child);
+        //position relative to master unit
+        var y = Config.tile.size.height * -(i + 1);
+        child.setPosition({x: 0, y: y});
+    }, this);
 };
 //------------------
 

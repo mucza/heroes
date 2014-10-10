@@ -120,14 +120,25 @@ Util.debugUnits = function(columns) {
         unitsCol.forEach(function (unit, index){
             var sign;
             if (unit != null) {
-                switch (unit.getType()) {
-                    case 'red':
-                        sign = 'R'; break;
-                    case 'blue':
-                        sign = 'B'; break;
-                    case 'green':
-                        sign = 'G'; break;
+                switch (unit.getState()) {
+                    case Unit.STATE_IDLE:
+                        switch (unit.getType()) {
+                            case 'red':
+                                sign = 'R'; break;
+                            case 'blue':
+                                sign = 'B'; break;
+                            case 'green':
+                                sign = 'G'; break;
+                        }
+                        break;
+
+                    case Unit.STATE_WALL:
+                        sign = '='; break;
+
+                    case Unit.STATE_ATTACK:
+                        sign = 'A'; break;
                 }
+
             } else {
                 sign =  '_';
             }

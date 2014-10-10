@@ -214,29 +214,29 @@ Column.prototype = {
     },
 
     reorderByUnitsWeight: function() {
-		var needChange = true;
-		while (needChange) {
-			needChange = false;
-			var lastWeight = Unit.STATE_IDLE;
-			var lastIndex;
+        var needChange = true;
+        while (needChange) {
+            needChange = false;
+            var lastWeight = Unit.STATE_IDLE;
+            var lastIndex;
 
-			for (var i = 0; i < this.units.length; i++) {
-				var unit = this.units[i];
-				if (unit != null) {
-					var weight = unit.getState();
+            for (var i = 0; i < this.units.length; i++) {
+                var unit = this.units[i];
+                if (unit != null) {
+                    var weight = unit.getState();
 
-					if (weight < lastWeight) {
-						//console.log('move ' + lastIndex, lastWeight, i, weight);
-						this.moveUnitDown(lastIndex);
-						needChange = true;
-						break;
-					}
+                    if (weight < lastWeight) {
+                        //console.log('move ' + lastIndex, lastWeight, i, weight);
+                        this.moveUnitDown(lastIndex);
+                        needChange = true;
+                        break;
+                    }
 
-					lastWeight = weight;
-					lastIndex = i;
-				}
-			}
-		}
+                    lastWeight = weight;
+                    lastIndex = i;
+                }
+            }
+        }
 
         this.moveUnits();
     },

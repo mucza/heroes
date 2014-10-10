@@ -98,7 +98,7 @@ Board.prototype = {
     },
 
     searchConnections: function() {
-		var attConn = this.searchAttackConnections();
+        var attConn = this.searchAttackConnections();
         attConn.forEach( function(connection) {
             console.log(connection);
             connection.make(this.columns);
@@ -125,36 +125,36 @@ Board.prototype = {
         return connections;
     },
 
-	searchWallConnections: function() {
-		var connections = [];
-		for (var i = 0; i < Config.board.height; i++) {
-			var type = null;
-			var counter = 0;
-			var j = Config.board.width;
-			while (--j >= 0) {
-				var unit = this.columns[j].getUnit(i);
-				if (unit == null || !unit.isIdle()) {
-					counter = 0;
-					type = null;
-				} else {
-					if (type == unit.getType()) {
-						counter++;
-					} else {
-						type = unit.getType();
-						counter = 1;
-					}
-				}
+    searchWallConnections: function() {
+        var connections = [];
+        for (var i = 0; i < Config.board.height; i++) {
+            var type = null;
+            var counter = 0;
+            var j = Config.board.width;
+            while (--j >= 0) {
+                var unit = this.columns[j].getUnit(i);
+                if (unit == null || !unit.isIdle()) {
+                    counter = 0;
+                    type = null;
+                } else {
+                    if (type == unit.getType()) {
+                        counter++;
+                    } else {
+                        type = unit.getType();
+                        counter = 1;
+                    }
+                }
 
-				if (counter == 3) {
-					connections.push(new Connection(Connection.WALL, type, i, j, counter));
-				} else if (counter > 3) {
-					connections[connections.length - 1].setLength(counter);
-				}
-			}
-		}
+                if (counter == 3) {
+                    connections.push(new Connection(Connection.WALL, type, i, j, counter));
+                } else if (counter > 3) {
+                    connections[connections.length - 1].correct(j, counter);
+                }
+            }
+        }
 
-		return connections;
-	},
+        return connections;
+    },
 
     reorderByUnitsWeight: function() {
         this.columns.forEach( function(column) {
@@ -169,11 +169,11 @@ Board.prototype = {
     },
 
     unitClick: function(unit) {
-		// var row = unit.getTilePosition().row;
-		// this.columns[unit.getTilePosition().column].unsetUnit(row);
-		// this.columns[unit.getTilePosition().column].setUnit(unit, row-1);
-		// unit.moveToTile();
-		// return;
+        // var row = unit.getTilePosition().row;
+        // this.columns[unit.getTilePosition().column].unsetUnit(row);
+        // this.columns[unit.getTilePosition().column].setUnit(unit, row-1);
+        // unit.moveToTile();
+        // return;
 
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_KILL) {
