@@ -10,6 +10,7 @@ Board = function() {
 
     this.unitsToMoveCount = 0;
     this.reinforcement = new Reinforcement();
+    this.reinforcementButton = this.addReinforcementsButton();
 }
 
 Board.prototype = {
@@ -27,7 +28,6 @@ Board.prototype = {
             this.columns[i].addTiles(this.position);
         }
 
-        this.addReinforcementsButton();
         this.addKillButton();
     },
 
@@ -95,6 +95,8 @@ Board.prototype = {
                 myGame.setState(MyGame.STATE_PLAYER, this);
             }
         }
+
+        this.reinforcementButton.setLabel(this.getUnitsToCallCount());
     },
 
     searchConnections: function() {
@@ -169,12 +171,6 @@ Board.prototype = {
     },
 
     unitClick: function(unit) {
-        // var row = unit.getTilePosition().row;
-        // this.columns[unit.getTilePosition().column].unsetUnit(row);
-        // this.columns[unit.getTilePosition().column].setUnit(unit, row-1);
-        // unit.moveToTile();
-        // return;
-
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_KILL) {
 
@@ -182,6 +178,7 @@ Board.prototype = {
             this.unitsToMoveCount = column.unitKilled(unit);
             if (this.unitsToMoveCount == 0) {
                 myGame.setState(MyGame.STATE_PLAYER, this);
+                this.reinforcementButton.setLabel(this.getUnitsToCallCount());
             } else {
                 myGame.setState(MyGame.STATE_MOVE, this);
             }
@@ -220,10 +217,10 @@ Board.prototype = {
 
     prepareReinforcements: function() {
         var unitsToCallCount = this.getUnitsToCallCount();
-        var unitsToCall = this.reinforcement.prepare(this.columns, unitsToCallCount);
-        this.unitsToMoveCount = this.reinforcement.getCalledUnitsCount();
+        var reinforcements = this.reinforcement.prepare(this.columns, unitsToCallCount);
+        this.unitsToMoveCount = reinforcements.count;
 
-        return unitsToCall;
+        return reinforcements.rows;
     },
 
     addReinforcementsButton: function() {
@@ -234,10 +231,7 @@ Board.prototype = {
         buttonBmp.ctx.fillStyle = '#ff0000';
         buttonBmp.ctx.fill();
 
-        game.add.button(740, 100, buttonBmp, this.initReinforcements, this);
-
-        var callUnitsKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        callUnitsKey.onDown.add(this.initReinforcements, this);
+        return new LabelButton(game, 760, 120, buttonBmp, this.getUnitsToCallCount(), this.initReinforcements, this, Phaser.Keyboard.SPACEBAR);
     },
 
     setKillState: function() {
@@ -257,9 +251,6 @@ Board.prototype = {
         buttonBmp.ctx.fillStyle = '#ffff00';
         buttonBmp.ctx.fill();
 
-        game.add.button(740, 180, buttonBmp, this.setKillState, this);
-
-        var killKey = game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
-        killKey.onDown.add(this.setKillState, this);
+        return new LabelButton(game, 760, 200, buttonBmp, 'kill', this.setKillState, this, Phaser.Keyboard.CONTROL);
     },
 };

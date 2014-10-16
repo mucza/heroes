@@ -1,15 +1,8 @@
-Reinforcement = function() {
-    this.calledUnitsCount = 0;
-}
+Reinforcement = function() {}
 
 Reinforcement.prototype = {
 
-    getCalledUnitsCount: function() {
-        return this.calledUnitsCount;
-    },
-
     prepare: function(columns, unitToCallCount) {
-        this.calledUnitsCount = 0;
         var columnsFill = [];
         var columnsMaxFill = [];
         var availableColumns = [];
@@ -51,13 +44,14 @@ Reinforcement.prototype = {
 
         var maxRows = Util.maxFromArray(columnsFill);
         var rowsToCall = [];
+        var calledUnitsCount = 0;
 
         for (var row = 0; row < maxRows; row++) {
             var rowToCall = [];
             unitsToCall.forEach( function (col, i) {
                 if (col != null && row in col) {
                     rowToCall.push(col[row]);
-                    this.calledUnitsCount++;
+                    calledUnitsCount++;
                 } else {
                     rowToCall.push(null);
                 }
@@ -67,9 +61,7 @@ Reinforcement.prototype = {
             rowsToCall.push(rowToCall);
         }
 
-        Config.board.maxUnits += 25;
-
-        return rowsToCall;
+        return {rows: rowsToCall, count: calledUnitsCount};
     },
 
     /*

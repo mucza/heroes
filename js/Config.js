@@ -21,7 +21,7 @@ var Config = {
         }
     },
     board: {
-        maxUnits: 5,
+        maxUnits: 32,
         width: 8,
         height: 6
     },
