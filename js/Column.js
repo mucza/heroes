@@ -103,35 +103,45 @@ Column.prototype = {
 
     unitKilled: function(unit) {
         var index = unit.getTilePosition().row;
-        var unitsAbove = this.getUnitsAbove(index);
         this.unsetUnit(index);
         unit.destroy();
 
-        unitsAbove.forEach( function(aboveUnit) {
-            var unitRow = aboveUnit.getTilePosition().row;
-            var newRow = this.getFirstFreeTileIndex(unitRow + 1);
+        var unitsToMove = this.getUnitsToFall();
+        this.unitsFall(unitsToMove);
+
+        return unitsToMove.length;
+    },
+
+    getUnitsToFall: function() {
+        var blank = null;
+        var unitsToMove = [];
+        var i = Config.board.height;
+        while (--i >= 0) {
+            var unit = this.units[i];
+            if (unit == null) {
+                blank = i;
+            } else if (blank != null) {
+                unitsToMove.push(unit);
+            }
+        }
+
+        return unitsToMove;
+    },
+
+    unitsFall: function(units) {
+        units.forEach( function(unitToMove) {
+            var unitRow = unitToMove.getTilePosition().row;
+            var newRow = this.getFirstFreeTileIndex();
             if (newRow == null) {
                 return;
             }
 
             this.unsetUnit(unitRow);
-            this.setUnit(aboveUnit, newRow);
-            aboveUnit.moveToTile();
+            this.setUnit(unitToMove, newRow);
+            unitToMove.moveToTile();
         }, this);
-
-        return unitsAbove.length;
     },
 
-    getUnitsAbove: function(index) {
-        var result = [];
-        while (index--) {
-            if (this.units[index] != null) {
-                result.push(this.units[index]);
-            }
-        }
-
-        return result;
-    },
 
     setUnitsDragable: function(enableDrag) {
         var firstUnit = true;
@@ -268,5 +278,83 @@ Column.prototype = {
             var row = u.getTilePosition().row;
             this.moveOneUnitDown(row);
         }, this);
-    }
+    },
+
+    reorderWalls: function() {
+        var i = this.units.length;
+        var walls = [];
+        var wallsHealth = 0;
+        while (--i >= 0) {
+            var unit = this.units[i];
+            if (unit != null && unit.getState() == Unit.STATE_WALL) {
+                walls.push( {wall: unit, startHealth: unit.getHealth()} );
+                wallsHealth += unit.getHealth();
+            }
+        }
+
+        var maxHealth = Config.unit.wall.health * 2;
+        if (walls.length < 2 || wallsHealth > (walls.length - 1) * maxHealth) {
+            return;
+        }
+
+        var healthDiffs = [];
+
+        var healthToAdd = wallsHealth;
+        for (var j = 0; j < walls.length; j++) {
+            var wall = walls[j].wall;
+            if (healthToAdd < 1) {
+                wall.setHealth(0);
+                healthDiffs[j] =  - walls[j].startHealth;
+                continue;
+            }
+
+            var toAdd = Math.min(healthToAdd, maxHealth);
+            wall.setHealth(toAdd);
+            healthDiffs[j] = toAdd -  walls[j].startHealth;
+            healthToAdd -= toAdd;
+        }
+
+        //console.log(healthDiffs);
+
+        var transfers = [];
+        var needChange = true;
+        while (needChange) {
+            needChange = false;
+
+            var to = null;
+            var from = null;
+            var value = 0;
+            for (var k = 0; k < walls.length; k++) {
+                if (healthDiffs[k] > 0 && to == null) {
+                    to = k;
+                    value = healthDiffs[k];
+                } else if (healthDiffs[k] < 0 && from == null) {
+                    from = k;
+                    value = Math.min(value, -1 * healthDiffs[k]);
+                    healthDiffs[to] -= value;
+                    healthDiffs[from] += value;
+
+                    transfers.push( {from: k, to: to, value: value} );
+                    break;
+                }
+            }
+
+            if (to != null) {
+                needChange = true;
+            }
+        }
+
+        transfers.forEach( function(transfer) {
+            var wall = walls[transfer.from].wall;
+            var destinationWall = walls[transfer.to].wall;
+
+            if (wall.getHealth() === 0) {
+                this.unsetUnit(wall.getTilePosition().row);
+                wall.mergeWalls(destinationWall.getTile());
+            }
+        }, this);
+
+        //console.log(healthDiffs);
+        //console.log(transfers);
+    },
 };

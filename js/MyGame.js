@@ -1,62 +1,55 @@
-function MyGame(game) {
+function MyGame(states) {
     if (arguments.callee._singletonInstance) {
         return arguments.callee._singletonInstance;
     }
 
     arguments.callee._singletonInstance = this;
 
-    var _game = game;
+    Phaser.Game.call(this, 800, 600, Phaser.AUTO, '', states);
 
-    this.getGame = function() {
-        return _game;
-    }
-
-    var _state = this.constructor.STATE_PLAYER;
-
+    var _state = MyGame.STATE_PLAYER;
     this.getState = function() {
         return _state;
     }
 
     this.setState = function(state, board) {
         switch(state) {
-            case this.constructor.STATE_PLAYER:
-                _state = this.constructor.STATE_PLAYER;
+            case MyGame.STATE_PLAYER:
+                _state = MyGame.STATE_PLAYER;
                 board.setUnitsDragable(true);
                 break;
 
-            case this.constructor.STATE_MOVE:
-                _state = this.constructor.STATE_MOVE;
+            case MyGame.STATE_MOVE:
+                _state = MyGame.STATE_MOVE;
                 board.setUnitsDragable(false);
                 break;
 
-            case this.constructor.STATE_REINF:
-                _state = this.constructor.STATE_REINF;
+            case MyGame.STATE_REINF:
+                _state = MyGame.STATE_REINF;
                 break;
 
-            case this.constructor.STATE_REINF_MOVE:
-                _state = this.constructor.STATE_REINF_MOVE;
+            case MyGame.STATE_REINF_MOVE:
+                _state = MyGame.STATE_REINF_MOVE;
                 board.setUnitsDragable(false);
                 break;
 
-            case this.constructor.STATE_DRAG:
-                _state = this.constructor.STATE_DRAG;
+            case MyGame.STATE_DRAG:
+                _state = MyGame.STATE_DRAG;
                 break;
 
-            case this.constructor.STATE_KILL:
-                _state = this.constructor.STATE_KILL;
+            case MyGame.STATE_KILL:
+                _state = MyGame.STATE_KILL;
                 board.setUnitsDragable(false);
                 break;
         }
     }
 
-    var _currentPlayer = this.constructor.PLAYER_1;
-
+    var _currentPlayer = MyGame.PLAYER_1;
     this.getCurrentPlayer = function() {
         return _currentPlayer;
     }
 
     var _boards = [];
-
     this.initBoards = function() {
         var board = new Board();
         board.preload();
@@ -67,6 +60,9 @@ function MyGame(game) {
         return _boards[_currentPlayer];
     }
 }
+
+MyGame.prototype = Object.create(Phaser.Game.prototype);
+MyGame.prototype.constructor = MyGame;
 
 MyGame.STATE_PLAYER = 1;
 MyGame.STATE_MOVE = 2;

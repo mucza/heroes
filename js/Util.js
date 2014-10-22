@@ -57,7 +57,7 @@ Util.BMP_CIRCLE = 1;
 Util.BMP_RECTANGLE = 2;
 
 Util.addBmpToCache = function(size, color, key, type) {
-    var game = MyGame().getGame();
+    var game = MyGame();
     var bmd = game.add.bitmapData(size.width, size.height);
     bmd.ctx.fillStyle = color;
 
@@ -93,7 +93,7 @@ Util.getBmpRectangle = function(bmd, size) {
 };
 
 Util.getEmitter = function(x, y) {
-    var emitter = game.add.emitter(x, y, 200);
+    var emitter = MyGame().add.emitter(x, y, 200);
 
     emitter.makeParticles('particle');
     emitter.setRotation(0, 0);
@@ -133,7 +133,7 @@ Util.debugUnits = function(columns) {
                         break;
 
                     case Unit.STATE_WALL:
-                        sign = '='; break;
+                        sign = unit.getHealth() + ''; break;
 
                     case Unit.STATE_ATTACK:
                         sign = 'A'; break;
@@ -141,6 +141,10 @@ Util.debugUnits = function(columns) {
 
             } else {
                 sign =  '_';
+            }
+
+            if (sign.length == 1) {
+                sign += ' ';
             }
 
             debugRaws[index] += sign + ' ';

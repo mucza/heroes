@@ -10,8 +10,10 @@ Unit = function(position, size, type) {
     this.tile = null;
     this.destinationTile = null;
 
-    Phaser.Sprite.call(this, MyGame().getGame(), position.x, position.y,
-        MyGame().getGame().cache.getBitmapData(Config.unit.type[type].key));
+    this._health = 1;
+
+    Phaser.Sprite.call(this, MyGame(), position.x, position.y,
+        MyGame().cache.getBitmapData(Config.unit.type[type].key));
 
     this.inputEnabled = true;
     this.events.onDragStop.add(this.board.stopDragUnit, this.board);
@@ -23,7 +25,7 @@ Unit.prototype = Object.create(Phaser.Sprite.prototype);
 Unit.prototype.constructor = Unit;
 
 Unit.prototype.show = function() {
-    MyGame().getGame().add.existing(this);
+    MyGame().add.existing(this);
 };
 
 Unit.prototype.update = function() {
@@ -36,9 +38,25 @@ Unit.prototype.getType = function() {
     return this._type;
 };
 
+Unit.prototype.getHealth = function() {
+    return this._health;
+}
+
+Unit.prototype.setHealth = function(health) {
+    this._health = health;
+
+    // if (this.state == Unit.STATE_WALL) {
+    //     this.loadTexture('wall_' + this._health);
+    // }
+}
+
 Unit.prototype.setPosition = function(position) {
     this.x = position.x;
     this.y = position.y;
+};
+
+Unit.prototype.getTile = function() {
+    return this.tile;
 };
 
 /**
@@ -69,10 +87,20 @@ Unit.prototype.moveToTile = function() {
     var tilesToMove = (this.destinationTile.getIndex() + 1) - startRow;
     var fallingTime = Math.abs(tilesToMove) * Config.unit.moveTimePerTile;
 
-    var tween = MyGame().getGame().add.tween(this).to(this.destinationTile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
+    var tween = MyGame().add.tween(this).to(this.destinationTile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
     this.tile = this.destinationTile;
 
     tween.onComplete.add(this.board.stopMoveUnit, this.board);
+};
+
+Unit.prototype.mergeWalls = function(destinationTile) {
+    var destinationRow = destinationTile.getPositionOnBoard().row;
+    var currentRow = this.getTilePosition().row;
+    var fallingTime = Math.abs(destinationRow - currentRow) * Config.unit.moveTimePerTile;
+
+    var tween = MyGame().add.tween(this).to(destinationTile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
+
+    tween.onComplete.add(this.board.stopMergingWalls, this.board);
 };
 
 Unit.prototype.disableDrag = function() {
@@ -97,7 +125,8 @@ Unit.prototype.setState = function(state) {
             break;
 
         case Unit.STATE_WALL:
-            this.loadTexture('wall');
+            this.setHealth(Config.unit.wall.health);
+            this.loadTexture('wall_' + this._health);
             break;
     }
 };

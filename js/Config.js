@@ -18,6 +18,9 @@ var Config = {
         size: {
             width: 80,
             height: 80
+        },
+        wall: {
+            health: 5
         }
     },
     board: {

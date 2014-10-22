@@ -99,20 +99,27 @@ Board.prototype = {
         this.reinforcementButton.setLabel(this.getUnitsToCallCount());
     },
 
+    stopMergingWalls: function(wall) {
+        console.log(wall);
+    },
+
     searchConnections: function() {
         var attConn = this.searchAttackConnections();
         attConn.forEach( function(connection) {
-            console.log(connection);
+            //console.log(connection);
             connection.make(this.columns);
         }, this);
 
         var wallConn = this.searchWallConnections();
         wallConn.forEach( function(connection) {
-            console.log(connection);
+            //console.log(connection);
             connection.make(this.columns);
         }, this);
 
         this.reorderByUnitsWeight();
+
+        var that = this;
+        setTimeout(function(){that.reorderWalls();}, 500);
     },
 
     searchAttackConnections: function() {
@@ -164,6 +171,12 @@ Board.prototype = {
         });
     },
 
+    reorderWalls: function() {
+        this.columns.forEach( function(column) {
+            column.reorderWalls();
+        });
+    },
+
     setUnitsDragable: function(enableDrag) {
         this.columns.forEach( function (column) {
             column.setUnitsDragable(enableDrag);
@@ -171,6 +184,8 @@ Board.prototype = {
     },
 
     unitClick: function(unit) {
+        //console.log(unit.getTilePosition());
+
         var myGame = MyGame();
         if (myGame.getState() == MyGame.STATE_KILL) {
 
@@ -206,7 +221,9 @@ Board.prototype = {
         }
     },
 
-    callReinforcements: function(reinforcementsLine) {
+    callReinforcements: function(reinforcements) {
+        var reinforcementsLine = reinforcements.shift();
+
         reinforcementsLine.forEach( function (unit) {
             if (unit != null) {
                 unit.show();
@@ -224,7 +241,7 @@ Board.prototype = {
     },
 
     addReinforcementsButton: function() {
-        var game = MyGame().getGame();
+        var game = MyGame();
         var buttonBmp = game.add.bitmapData(40, 40);
         buttonBmp.ctx.beginPath();
         buttonBmp.ctx.rect(0, 0, 40, 40);
@@ -244,7 +261,7 @@ Board.prototype = {
     },
 
     addKillButton: function() {
-        var game = MyGame().getGame();
+        var game = MyGame();
         var buttonBmp = game.add.bitmapData(40, 40);
         buttonBmp.ctx.beginPath();
         buttonBmp.ctx.rect(0, 0, 40, 40);

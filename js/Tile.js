@@ -18,7 +18,7 @@ Tile = function(columnIndex, index) {
 
 Tile.prototype = {
     preload: function(posX, posY, key) {
-        var game = MyGame().getGame();
+        var game = MyGame();
         this.sprite = game.add.sprite(posX, posY, game.cache.getBitmapData(key));
         this.sprite.inputEnabled = true;
     },
