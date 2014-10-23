@@ -28,13 +28,28 @@ Connection.prototype = {
     makeTripleAttack: function(columns) {
         var units = columns[this.column].getUnits();
 
-        var parent = units[this.row + 2];
+        var master = units[this.row + 2];
         var child1 = units[this.row + 1];
         var child2 = units[this.row];
 
-        parent.makeTripleAttack([child1, child2]);
+        master.makeTripleAttack([child1, child2]);
+
+        //check if there's another triple attack with same unit type below this one
+        var index = this.row + 3;
+        if (index >= units.length) {
+            return;
+        }
+
+        var unitToCheck = units[index];
+        if (unitToCheck.isTripleAttack() && unitToCheck.getType() === master.getType()) {
+            this.mergeTripleAttacks(master);
+        }
     },
 
+    mergeTripleAttacks: function(master) {
+        var row = master.getTilePosition().row;
+
+    },
 
     makeWall: function(columns) {
         var i = this.length;

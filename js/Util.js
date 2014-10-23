@@ -95,11 +95,11 @@ Util.getBmpRectangle = function(bmd, size) {
 Util.getEmitter = function(x, y) {
     var emitter = MyGame().add.emitter(x, y, 200);
 
-    emitter.makeParticles('particle');
+    emitter.makeParticles('particles', 0);
     emitter.setRotation(0, 0);
-    emitter.setAlpha(0.1, 0.2);
-    emitter.minParticleScale = 0.1;
-    emitter.maxParticleScale = 0.2;
+    emitter.setAlpha(0.3, 0.5);
+    emitter.minParticleScale = 0.8;
+    emitter.maxParticleScale = 1;
     emitter.gravity = -500;
 
     return emitter;

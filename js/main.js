@@ -8,7 +8,7 @@ function preload () {
 
     myGame.initBoards();
 
-    myGame.load.image('particle', 'img/particle.png');
+    myGame.load.spritesheet('particles', 'img/particles_sheet.png', 16, 16, 4);
     myGame.load.image('wall_5', 'img/wall_5.png');
     myGame.load.image('wall_10', 'img/wall_10.png');
 }
