@@ -1,4 +1,10 @@
 var Config = {
+    game: {
+        size: {
+            width: 800,
+            height: 600
+        }
+    },
     unit: {
         moveTimePerTile: 150,
         types: ['red', 'green', 'blue'],

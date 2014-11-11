@@ -3,6 +3,7 @@ var myGame = new MyGame({ preload: preload, create: create, render: render });
 function preload () {
     Util.addBmpToCache(Config.tile.size, Config.tile.color, 'tile', Util.BMP_RECTANGLE);
     myGame.initBoards();
+    myGame.addSwitchPlayerButton();
 
     myGame.load.spritesheet('particles', 'img/particles_sheet.png', 16, 16, 4);
     myGame.load.spritesheet('walls', 'img/walls80AB.png', 80, 80, 24);

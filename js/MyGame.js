@@ -5,7 +5,7 @@ function MyGame(states) {
 
     arguments.callee._singletonInstance = this;
 
-    Phaser.Game.call(this, 800, 600, Phaser.AUTO, '', states);
+    Phaser.Game.call(this, Config.game.size.width, Config.game.size.height, Phaser.AUTO, '', states);
 
     var _state = MyGame.STATE_PLAYER;
     this.getState = function() {
@@ -32,6 +32,16 @@ function MyGame(states) {
         }
     };
 
+    var _boards = [];
+    this.initBoards = function() {
+        var board1 = new Board(true, Config.board.position1);
+        var board2 = new Board(false, Config.board.position2);
+        board1.preload();
+        board2.preload();
+        _boards[MyGame.PLAYER_1] = board1;
+        _boards[MyGame.PLAYER_2] = board2;
+    };
+
     var _currentPlayer = MyGame.PLAYER_1;
     this.getCurrentPlayer = function() {
         return _currentPlayer;
@@ -45,18 +55,18 @@ function MyGame(states) {
         }
     };
 
-    var _boards = [];
-    this.initBoards = function() {
-        var board1 = new Board(true, Config.board.position1);
-        var board2 = new Board(false, Config.board.position2);
-        board1.preload();
-        board2.preload();
-        _boards[MyGame.PLAYER_1] = board1;
-        _boards[MyGame.PLAYER_2] = board2;
-    };
-
     this.getBoard = function() {
         return _boards[_currentPlayer];
+    };
+
+    this.addSwitchPlayerButton = function() {
+        var buttonBmp = this.add.bitmapData(40, 40);
+        buttonBmp.ctx.beginPath();
+        buttonBmp.ctx.rect(0, 0, 40, 40);
+        buttonBmp.ctx.fillStyle = '#0066FF';
+        buttonBmp.ctx.fill();
+
+        return new LabelButton(this, 40, 500, buttonBmp, 'S', this.switchPlayer, this, Phaser.Keyboard.SHIFT);
     }
 }
 

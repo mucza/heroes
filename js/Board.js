@@ -82,10 +82,9 @@ Board.prototype = {
         } else if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
             if (--this.unitsToMoveCount == 0) {
                 myGame.setState(MyGame.STATE_PLAYER);
+                this.reinforcementButton.setLabel(this.getUnitsToCallCount());
             }
         }
-
-        this.reinforcementButton.setLabel(this.getUnitsToCallCount());
     },
 
     stopMergingWalls: function(wall) {
@@ -103,6 +102,8 @@ Board.prototype = {
         console.log('end flow');
         Util.debugUnits(this.columns);
         myGame.setState(MyGame.STATE_PLAYER);
+
+        this.reinforcementButton.setLabel(this.getUnitsToCallCount());
     },
 
     searchConnections: function(callback) {
