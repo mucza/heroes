@@ -16,11 +16,10 @@ Util.getRandomWallFrame = function(wallHealth) {
 };
 
 Util.getUnitTypes = function() {
+    var typesLength = Config.unit.types.length;
     var types = [];
-    var i = 0;
-    for (type in Config.unit.type) {
-        //types.push(type);
-        types.push(i++);
+    for (var i = 0; i < typesLength; i++) {
+        types.push(i);
     }
 
     return types;
@@ -131,9 +130,9 @@ Util.debugUnits = function(columns) {
                             case 0:
                                 sign = 'R'; break;
                             case 1:
-                                sign = 'B'; break;
-                            case 2:
                                 sign = 'G'; break;
+                            case 2:
+                                sign = 'B'; break;
                         }
                         break;
 

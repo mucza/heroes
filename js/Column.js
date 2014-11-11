@@ -3,7 +3,7 @@ Column = function(index) {
     this.tiles = [];
     this.units = [];
     this.highlightedTileIndex = null;
-}
+};
 
 Column.prototype = {
 
@@ -18,12 +18,11 @@ Column.prototype = {
 
     drawTile: function(row, boardPosition) {
         var col = this.index;
-        var key = Config.tile.type[(col + row) % 2].key;
         var posX = col * Config.tile.size.width + boardPosition.x;
         var posY = row * Config.tile.size.height + boardPosition.y;
 
         var tile = new Tile(col, row);
-        tile.preload(posX, posY, key);
+        tile.preload(posX, posY);
 
         return tile;
     },
@@ -227,7 +226,7 @@ Column.prototype = {
         while (needChange) {
             needChange = false;
             var lastWeight = Unit.STATE_IDLE;
-            var lastIndex;
+            var lastIndex = null;
 
             for (var i = 0; i < this.units.length; i++) {
                 var unit = this.units[i];
@@ -364,5 +363,5 @@ Column.prototype = {
 
         //console.log(healthDiffs);
         //console.log(transfers);
-    },
+    }
 };

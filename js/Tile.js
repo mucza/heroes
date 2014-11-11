@@ -4,29 +4,25 @@ Tile = function(columnIndex, index) {
 
     this.sprite = null;
 
-    this.conf = {
-        highlightColor: 0xff1919
-    };
-
     this.getColumnIndex = function() {
         return _columnIndex;
-    }
+    };
     this.getIndex = function() {
         return _index;
-    }
-}
+    };
+};
 
 Tile.prototype = {
-    preload: function(posX, posY, key) {
+    preload: function(posX, posY) {
         var game = MyGame();
-        this.sprite = game.add.sprite(posX, posY, game.cache.getBitmapData(key));
+        this.sprite = game.add.sprite(posX, posY, game.cache.getBitmapData('tile'));
         this.sprite.inputEnabled = true;
     },
 
     highlight: function(flag) {
         var color;
         if (flag) {
-            color = this.conf.highlightColor;
+            color = Config.tile.highlight;
         } else {
             color = 0xffffff;
         }

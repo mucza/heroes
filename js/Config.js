@@ -1,20 +1,7 @@
 var Config = {
     unit: {
         moveTimePerTile: 150,
-        type: {
-            'red': {
-                key: 'unitRed',
-                color: '#ff3636'
-            },
-            'green': {
-                key: 'unitGreen',
-                color: '#87c540'
-            },
-            'blue': {
-                key: 'unitBlue',
-                color: '#357385'
-            }
-        },
+        types: ['red', 'green', 'blue'],
         size: {
             width: 80,
             height: 80
@@ -26,25 +13,23 @@ var Config = {
     board: {
         maxUnits: 32,
         width: 8,
-        height: 6
+        height: 6,
+        position1: {
+            x: 80,
+            y: 80
+        },
+        position2: {
+            x: 80,
+            y: 580
+        }
     },
     tile: {
-        type: {
-            0: {
-                key: 'tile1',
-                //color: '#262f38'
-                color: '#191919'
-            },
-            1: {
-                key: 'tile2',
-                //color: '#fdbd63'
-                color: '#191919'
-            }
-        },
+        color: '#191919',
+        highlight: 0xff1919,
         size: {
             width: 80,
             height: 80
         }
     },
     timeout: 300
-}
+};

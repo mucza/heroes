@@ -10,10 +10,11 @@ function MyGame(states) {
     var _state = MyGame.STATE_PLAYER;
     this.getState = function() {
         return _state;
-    }
+    };
 
-    this.setState = function(state, board) {
+    this.setState = function(state) {
         _state = state;
+        var board = this.getBoard();
         switch(_state) {
             case MyGame.STATE_PLAYER:
                 board.setUnitsDragable(true);
@@ -29,19 +30,30 @@ function MyGame(states) {
             case MyGame.STATE_DRAG:
                 break;
         }
-    }
+    };
 
     var _currentPlayer = MyGame.PLAYER_1;
     this.getCurrentPlayer = function() {
         return _currentPlayer;
-    }
+    };
+
+    this.switchPlayer = function() {
+        if (_currentPlayer == MyGame.PLAYER_1) {
+            _currentPlayer = MyGame.PLAYER_2;
+        } else {
+            _currentPlayer = MyGame.PLAYER_1;
+        }
+    };
 
     var _boards = [];
     this.initBoards = function() {
-        var board = new Board();
-        board.preload();
-        _boards.push(board);
-    }
+        var board1 = new Board(true, Config.board.position1);
+        var board2 = new Board(false, Config.board.position2);
+        board1.preload();
+        board2.preload();
+        _boards[MyGame.PLAYER_1] = board1;
+        _boards[MyGame.PLAYER_2] = board2;
+    };
 
     this.getBoard = function() {
         return _boards[_currentPlayer];
