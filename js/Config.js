@@ -32,16 +32,19 @@ var Config = {
         type: {
             0: {
                 key: 'tile1',
-                color: '#262f38'
+                //color: '#262f38'
+                color: '#191919'
             },
             1: {
                 key: 'tile2',
-                color: '#fdbd63'
+                //color: '#fdbd63'
+                color: '#191919'
             }
         },
         size: {
             width: 80,
             height: 80
         }
-    }
+    },
+    timeout: 300
 }

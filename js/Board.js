@@ -85,10 +85,7 @@ Board.prototype = {
         if (myGame.getState() == MyGame.STATE_MOVE) {
             if (--this.unitsToMoveCount == 0) {
 
-                this.searchConnections();
-
-                Util.debugUnits(this.columns);
-                myGame.setState(MyGame.STATE_PLAYER, this);
+                this.startFlow();
             }
         } else if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
             if (--this.unitsToMoveCount == 0) {
@@ -100,10 +97,24 @@ Board.prototype = {
     },
 
     stopMergingWalls: function(wall) {
-        console.log(wall);
+        var tilePosition = wall.getTilePosition();
+        wall.destroy();
+        var mergedWall = this.columns[tilePosition.column].getUnit(tilePosition.row);
+        mergedWall.updateWallTexture();
     },
 
-    searchConnections: function() {
+    startFlow: function() {
+        this.searchConnections(false);
+    },
+
+    endFlow: function() {
+        console.log('end flow');
+        Util.debugUnits(this.columns);
+        myGame.setState(MyGame.STATE_PLAYER, this);
+    },
+
+    searchConnections: function(callback) {
+        console.log('search conn');
         var attConn = this.searchAttackConnections();
         attConn.forEach( function(connection) {
             //console.log(connection);
@@ -116,10 +127,34 @@ Board.prototype = {
             connection.make(this.columns);
         }, this);
 
-        this.reorderByUnitsWeight();
+        if (wallConn.length + attConn.length > 0) {
+            this.reorderByUnitsWeight();
+        } else if (callback) {
+            var that = this;
+            setTimeout(function(){that.reorderWalls();}, Config.timeout);
+        } else {
+            this.endFlow();
+        }
+    },
+
+    reorderByUnitsWeight: function() {
+        console.log('reorder by weight');
+        this.columns.forEach( function(column) {
+            column.reorderByUnitsWeight();
+        });
 
         var that = this;
-        setTimeout(function(){that.reorderWalls();}, 500);
+        setTimeout(function(){that.searchConnections(true);}, Config.timeout);
+    },
+
+    reorderWalls: function() {
+        console.log('reorder walls');
+        this.columns.forEach( function(column) {
+            column.reorderWalls();
+        });
+
+        var that = this;
+        setTimeout(function(){that.searchConnections(false);}, Config.timeout);
     },
 
     searchAttackConnections: function() {
@@ -163,18 +198,6 @@ Board.prototype = {
         }
 
         return connections;
-    },
-
-    reorderByUnitsWeight: function() {
-        this.columns.forEach( function(column) {
-            column.reorderByUnitsWeight();
-        });
-    },
-
-    reorderWalls: function() {
-        this.columns.forEach( function(column) {
-            column.reorderWalls();
-        });
     },
 
     setUnitsDragable: function(enableDrag) {

@@ -11,11 +11,16 @@ Util.getRandomElem = function(arr) {
     return arr[rand];
 };
 
+Util.getRandomWallFrame = function(wallHealth) {
+    return Util.getRandomElem([--wallHealth, wallHealth + 12]);
+};
 
 Util.getUnitTypes = function() {
     var types = [];
+    var i = 0;
     for (type in Config.unit.type) {
-        types.push(type);
+        //types.push(type);
+        types.push(i++);
     }
 
     return types;
@@ -123,11 +128,11 @@ Util.debugUnits = function(columns) {
                 switch (unit.getState()) {
                     case Unit.STATE_IDLE:
                         switch (unit.getType()) {
-                            case 'red':
+                            case 0:
                                 sign = 'R'; break;
-                            case 'blue':
+                            case 1:
                                 sign = 'B'; break;
-                            case 'green':
+                            case 2:
                                 sign = 'G'; break;
                         }
                         break;

@@ -1,16 +1,11 @@
 var myGame = new MyGame({ preload: preload, create: create, render: render });
 
 function preload () {
-    var types = Config.unit.type;
-    for (var type in types) {
-        Util.addBmpToCache(Config.unit.size, types[type].color, types[type].key, Util.BMP_CIRCLE);
-    }
-
     myGame.initBoards();
 
     myGame.load.spritesheet('particles', 'img/particles_sheet.png', 16, 16, 4);
-    myGame.load.image('wall_5', 'img/wall_5.png');
-    myGame.load.image('wall_10', 'img/wall_10.png');
+    myGame.load.spritesheet('walls', 'img/walls80AB.png', 80, 80, 24);
+    myGame.load.spritesheet('gnomes', 'img/gnomes.png', 80, 80, 9);
 }
 
 function create () {

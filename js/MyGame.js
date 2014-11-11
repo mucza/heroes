@@ -13,33 +13,20 @@ function MyGame(states) {
     }
 
     this.setState = function(state, board) {
-        switch(state) {
+        _state = state;
+        switch(_state) {
             case MyGame.STATE_PLAYER:
-                _state = MyGame.STATE_PLAYER;
                 board.setUnitsDragable(true);
                 break;
 
             case MyGame.STATE_MOVE:
-                _state = MyGame.STATE_MOVE;
+            case MyGame.STATE_REINF_MOVE:
+            case MyGame.STATE_KILL:
                 board.setUnitsDragable(false);
                 break;
 
             case MyGame.STATE_REINF:
-                _state = MyGame.STATE_REINF;
-                break;
-
-            case MyGame.STATE_REINF_MOVE:
-                _state = MyGame.STATE_REINF_MOVE;
-                board.setUnitsDragable(false);
-                break;
-
             case MyGame.STATE_DRAG:
-                _state = MyGame.STATE_DRAG;
-                break;
-
-            case MyGame.STATE_KILL:
-                _state = MyGame.STATE_KILL;
-                board.setUnitsDragable(false);
                 break;
         }
     }

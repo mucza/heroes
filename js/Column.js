@@ -106,8 +106,22 @@ Column.prototype = {
         this.unsetUnit(index);
         unit.destroy();
 
+        return this.unitsFall();
+    },
+
+    unitsFall: function() {
         var unitsToMove = this.getUnitsToFall();
-        this.unitsFall(unitsToMove);
+
+        unitsToMove.forEach( function(unitToMove) {
+            var newRow = this.getFirstFreeTileIndex();
+            if (newRow == null) {
+                return;
+            }
+
+            this.shiftUnit(unitToMove, newRow);
+        }, this);
+
+        this.moveUnits();
 
         return unitsToMove.length;
     },
@@ -120,28 +134,13 @@ Column.prototype = {
             var unit = this.units[i];
             if (unit == null) {
                 blank = i;
-            } else if (blank != null) {
+            } else if (blank != null && !unit.isTripleAttackSlave()) {
                 unitsToMove.push(unit);
             }
         }
 
         return unitsToMove;
     },
-
-    unitsFall: function(units) {
-        units.forEach( function(unitToMove) {
-            var unitRow = unitToMove.getTilePosition().row;
-            var newRow = this.getFirstFreeTileIndex();
-            if (newRow == null) {
-                return;
-            }
-
-            this.unsetUnit(unitRow);
-            this.setUnit(unitToMove, newRow);
-            unitToMove.moveToTile();
-        }, this);
-    },
-
 
     setUnitsDragable: function(enableDrag) {
         var firstUnit = true;
@@ -254,31 +253,34 @@ Column.prototype = {
     moveUnitDown: function(index) {
         var heavierUnit = this.units[index];
         var lighterUnit = this.units[index + 1];
+        this.shiftUnit(heavierUnit, index + 1);
         if (heavierUnit.isTripleAttack()) {
-            this.moveTripleUnitDown(index);
             this.setUnit(lighterUnit, index - 2);
-
         } else {
-            this.moveOneUnitDown(index);
             this.setUnit(lighterUnit, index);
         }
     },
 
-    moveOneUnitDown: function(index) {
-        var unit = this.units[index];
-        this.unsetUnit(index);
-        this.setUnit(unit, index + 1);
+    shiftUnit: function(unit, newIndex) {
+        var index = unit.getTilePosition().row;
+        if (unit.isTripleAttack()) {
+            this.shiftTripleAttack(unit, newIndex);
+        } else {
+            this.unsetUnit(index);
+            this.setUnit(unit, newIndex);
+        }
     },
 
-    moveTripleUnitDown: function(index) {
-        var unit = this.units[index];
-
-        var units = unit.getAllUnits();
-        units.forEach( function (u) {
-            var row = u.getTilePosition().row;
-            this.moveOneUnitDown(row);
+    shiftTripleAttack: function(unit, newIndex) {
+        var diff = newIndex - unit.getTilePosition().row;
+        var allUnits = unit.getAllUnits();
+        allUnits.forEach( function(u) {
+            var unitPos = u.getTilePosition().row;
+            this.unsetUnit(unitPos);
+            this.setUnit(u, unitPos + diff);
         }, this);
     },
+
 
     reorderWalls: function() {
         var i = this.units.length;
@@ -350,9 +352,15 @@ Column.prototype = {
 
             if (wall.getHealth() === 0) {
                 this.unsetUnit(wall.getTilePosition().row);
-                wall.mergeWalls(destinationWall.getTile());
+                wall.setDestinationTile(destinationWall.getTile());
+                wall.moveToTile(true);
+                //wall.mergeWalls(destinationWall.getTile());
             }
         }, this);
+
+        if (transfers.length > 0) {
+            this.unitsFall();
+        }
 
         //console.log(healthDiffs);
         //console.log(transfers);

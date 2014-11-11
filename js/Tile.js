@@ -5,7 +5,7 @@ Tile = function(columnIndex, index) {
     this.sprite = null;
 
     this.conf = {
-        highlightColor: 0xff00ff
+        highlightColor: 0xff1919
     };
 
     this.getColumnIndex = function() {

@@ -12,14 +12,20 @@ Unit = function(position, size, type) {
 
     this._health = 1;
 
-    Phaser.Sprite.call(this, MyGame(), position.x, position.y,
-        MyGame().cache.getBitmapData(Config.unit.type[type].key));
+    Phaser.Sprite.call(this, MyGame(), position.x, position.y, 'gnomes');
+    this.animationArray = [0, 1, 2, 1];
+    this.animationArray.forEach(function(el, i) {
+        this.animationArray[i] = el + (type * 3);
+    }, this);
+
+    this.animations.add('body', this.animationArray);
+    this.animations.play('body', 5, true);
 
     this.inputEnabled = true;
     this.events.onDragStop.add(this.board.stopDragUnit, this.board);
     this.events.onDragStart.add(this.board.startDragUnit, this.board);
     this.events.onInputDown.add(this.board.unitClick, this.board);
-}
+};
 
 Unit.prototype = Object.create(Phaser.Sprite.prototype);
 Unit.prototype.constructor = Unit;
@@ -40,15 +46,15 @@ Unit.prototype.getType = function() {
 
 Unit.prototype.getHealth = function() {
     return this._health;
-}
+};
 
 Unit.prototype.setHealth = function(health) {
     this._health = health;
+};
 
-    // if (this.state == Unit.STATE_WALL) {
-    //     this.loadTexture('wall_' + this._health);
-    // }
-}
+Unit.prototype.updateWallTexture = function() {
+    this.frame = Util.getRandomWallFrame(this._health);
+};
 
 Unit.prototype.setPosition = function(position) {
     this.x = position.x;
@@ -74,15 +80,14 @@ Unit.prototype.setDestinationTile = function(tile) {
     this.destinationTile = tile;
 };
 
-Unit.prototype.moveToTile = function() {
-    if (this.tile == this.destinationTile ||
-        (this.isTripleAttack() && !this.master)) {
+Unit.prototype.moveToTile = function(mergingWalls) {
+    if (this.tile == this.destinationTile || this.isTripleAttackSlave()) {
         return;
     }
 
     var startRow = 0;
     if (this.tile != null && this.tile.getColumnIndex() == this.destinationTile.getColumnIndex()) {
-        startRow = this.tile.getPositionOnBoard().row + 1;
+        startRow = this.tile.getIndex() + 1;
     }
     var tilesToMove = (this.destinationTile.getIndex() + 1) - startRow;
     var fallingTime = Math.abs(tilesToMove) * Config.unit.moveTimePerTile;
@@ -90,7 +95,12 @@ Unit.prototype.moveToTile = function() {
     var tween = MyGame().add.tween(this).to(this.destinationTile.getPosition(), fallingTime, Phaser.Easing.Linear.None, true);
     this.tile = this.destinationTile;
 
-    tween.onComplete.add(this.board.stopMoveUnit, this.board);
+    mergingWalls = mergingWalls || false;
+    if (mergingWalls) {
+        tween.onComplete.add(this.board.stopMergingWalls, this.board);
+    } else {
+        tween.onComplete.add(this.board.stopMoveUnit, this.board);
+    }
 };
 
 Unit.prototype.mergeWalls = function(destinationTile) {
@@ -126,7 +136,7 @@ Unit.prototype.setState = function(state) {
 
         case Unit.STATE_WALL:
             this.setHealth(Config.unit.wall.health);
-            this.loadTexture('wall_' + this._health);
+            this.loadTexture('walls', Util.getRandomWallFrame(this._health));
             break;
     }
 };
@@ -142,6 +152,10 @@ Unit.prototype.getState = function() {
 //move to other class
 Unit.prototype.isTripleAttack = function() {
     return this.state == Unit.STATE_ATTACK && this.size == 1;
+};
+
+Unit.prototype.isTripleAttackSlave = function() {
+    return this.isTripleAttack() && !this.master;
 };
 
 Unit.prototype.getAllUnits = function() {
