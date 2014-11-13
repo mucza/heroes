@@ -7,35 +7,10 @@ function MyGame(states) {
 
     Phaser.Game.call(this, Config.game.size.width, Config.game.size.height, Phaser.AUTO, '', states);
 
-    var _state = MyGame.STATE_PLAYER;
-    this.getState = function() {
-        return _state;
-    };
-
-    this.setState = function(state) {
-        _state = state;
-        var board = this.getBoard();
-        switch(_state) {
-            case MyGame.STATE_PLAYER:
-                board.setUnitsDragable(true);
-                break;
-
-            case MyGame.STATE_MOVE:
-            case MyGame.STATE_REINF_MOVE:
-            case MyGame.STATE_KILL:
-                board.setUnitsDragable(false);
-                break;
-
-            case MyGame.STATE_REINF:
-            case MyGame.STATE_DRAG:
-                break;
-        }
-    };
-
     var _boards = [];
     this.initBoards = function() {
-        var board1 = new Board(true, Config.board.position1);
-        var board2 = new Board(false, Config.board.position2);
+        var board1 = new Board(Board.ORIENTATION_UPPER, Config.board.position1, MyGame.STATE_PLAYER);
+        var board2 = new Board(Board.ORIENTATION_LOWER, Config.board.position2);
         board1.preload();
         board2.preload();
         _boards[MyGame.PLAYER_1] = board1;
@@ -48,15 +23,26 @@ function MyGame(states) {
     };
 
     this.switchPlayer = function() {
+        var currentBoard = this.getBoard();
+        if (currentBoard.getState() !== MyGame.STATE_PLAYER) {
+            return;
+        }
+
+        currentBoard.setState(MyGame.STATE_INACTIVE);
         if (_currentPlayer == MyGame.PLAYER_1) {
             _currentPlayer = MyGame.PLAYER_2;
         } else {
             _currentPlayer = MyGame.PLAYER_1;
         }
+        this.getBoard().setState(MyGame.STATE_PLAYER);
     };
 
     this.getBoard = function() {
         return _boards[_currentPlayer];
+    };
+
+    this.getBoards = function() {
+        return _boards;
     };
 
     this.addSwitchPlayerButton = function() {
@@ -73,6 +59,7 @@ function MyGame(states) {
 MyGame.prototype = Object.create(Phaser.Game.prototype);
 MyGame.prototype.constructor = MyGame;
 
+MyGame.STATE_INACTIVE = 0;
 MyGame.STATE_PLAYER = 1;
 MyGame.STATE_MOVE = 2;
 MyGame.STATE_REINF = 3;

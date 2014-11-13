@@ -2,7 +2,7 @@ var Config = {
     game: {
         size: {
             width: 800,
-            height: 600
+            height: 1140
         }
     },
     unit: {
@@ -26,7 +26,7 @@ var Config = {
         },
         position2: {
             x: 80,
-            y: 580
+            y: 980
         }
     },
     tile: {

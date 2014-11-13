@@ -1,5 +1,6 @@
-Column = function(index) {
+Column = function(index, boardOrientation) {
     this.index = index;
+    this.boardOrientation = boardOrientation;
     this.tiles = [];
     this.units = [];
     this.highlightedTileIndex = null;
@@ -18,8 +19,14 @@ Column.prototype = {
 
     drawTile: function(row, boardPosition) {
         var col = this.index;
-        var posX = col * Config.tile.size.width + boardPosition.x;
-        var posY = row * Config.tile.size.height + boardPosition.y;
+
+        var yFactor = row * Config.tile.size.height;
+        if (this.boardOrientation === Board.ORIENTATION_LOWER) {
+            yFactor *= -1;
+        }
+
+        var posY = boardPosition.y + yFactor;
+        var posX = boardPosition.x + (col * Config.tile.size.width);
 
         var tile = new Tile(col, row);
         tile.preload(posX, posY);
@@ -29,6 +36,17 @@ Column.prototype = {
 
     getTile: function(index) {
         return this.tiles[index];
+    },
+
+    getStartPosition: function() {
+        var startPosition = this.tiles[0].getPosition();
+        if (this.boardOrientation === Board.ORIENTATION_UPPER) {
+            startPosition.y -= Config.tile.size.height;
+        } else {
+            startPosition.y += Config.tile.size.height;
+        }
+
+        return startPosition;
     },
 
     highlightOn: function() {
@@ -44,13 +62,6 @@ Column.prototype = {
             this.tiles[this.highlightedTileIndex].highlight(false);
             this.highlightedTileIndex = null;
         }
-    },
-
-    getStartPosition: function() {
-        var startPosition = this.tiles[0].getPosition();
-        startPosition.y -= Config.tile.size.height;
-
-        return startPosition;
     },
 
     canDropUnit: function(unit) {

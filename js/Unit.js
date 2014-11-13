@@ -183,7 +183,11 @@ Unit.prototype.makeTripleAttack = function(children) {
         child.setState(Unit.STATE_ATTACK);
         this.addChild(child);
         //position relative to master unit
-        var y = Config.tile.size.height * -(i + 1);
+        var factor = i + 1;
+        if (this.board.getOrientation() === Board.ORIENTATION_UPPER) {
+            factor *= -1;
+        }
+        var y = Config.tile.size.height * factor;
         child.setPosition({x: 0, y: y});
     }, this);
 };

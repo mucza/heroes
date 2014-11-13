@@ -14,14 +14,15 @@ function create () {
 }
 
 function render() {
-    if (myGame.getState() == MyGame.STATE_REINF) {
-
-        var board = myGame.getBoard();
+    var board = myGame.getBoard();
+    if (board.getState() === MyGame.STATE_REINF) {
         var reinforcements = board.prepareReinforcements();
 
         myGame.time.events.repeat(Config.unit.moveTimePerTile, reinforcements.length, board.callReinforcements, board, reinforcements);
-        myGame.setState(MyGame.STATE_REINF_MOVE);
+        board.setState(MyGame.STATE_REINF_MOVE);
     }
 
-    myGame.debug.text(myGame.getState(), 740, 300);
+    var boards = myGame.getBoards();
+    myGame.debug.text(boards[MyGame.PLAYER_1].getState(), 740, 300);
+    myGame.debug.text(boards[MyGame.PLAYER_2].getState(), 740, 800);
 }

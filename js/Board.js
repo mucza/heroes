@@ -1,7 +1,8 @@
-Board = function(upper, position) {
+Board = function(orientation, position, state) {
 
-    this.upper = upper;
+    this.orientation = orientation;
     this.position = position;
+    this.state = state || MyGame.STATE_INACTIVE;
 
     this.columns = [];
     this.highlightedColumnIndex = null;
@@ -11,16 +12,47 @@ Board = function(upper, position) {
     this.reinforcementButton = this.addReinforcementsButton();
 };
 
+Board.ORIENTATION_UPPER = 0;
+Board.ORIENTATION_LOWER = 1;
+
 Board.prototype = {
 
     preload: function() {
         for (var i = 0; i < Config.board.width; i++) {
 
-            this.columns[i] = new Column(i);
+            this.columns[i] = new Column(i, this.orientation);
             this.columns[i].addTiles(this.position);
         }
 
         this.addKillButton();
+    },
+
+    getOrientation: function() {
+        return this.orientation;
+    },
+
+    getState: function() {
+        return this.state;
+    },
+
+    setState: function(state) {
+        this.state = state;
+        switch(state) {
+            case MyGame.STATE_PLAYER:
+                this.setUnitsDragable(true);
+                break;
+
+            case MyGame.STATE_MOVE:
+            case MyGame.STATE_REINF_MOVE:
+            case MyGame.STATE_KILL:
+            case MyGame.STATE_INACTIVE:
+                this.setUnitsDragable(false);
+                break;
+
+            case MyGame.STATE_REINF:
+            case MyGame.STATE_DRAG:
+                break;
+        }
     },
 
     unitDragged: function(unit) {
@@ -54,13 +86,13 @@ Board.prototype = {
 
         var column = this.columns[this.highlightedColumnIndex];
         if (column.canDropUnit(unit)) {
-            MyGame().setState(MyGame.STATE_MOVE);
+            this.setState(MyGame.STATE_MOVE);
             this.unitsToMoveCount = 1;
             previousColumn.unsetUnit(previousTilePosition.row);
             column.setDroppedUnit(unit);
         } else {
             unit.setPosition(previousTile.getPosition());
-            MyGame().setState(MyGame.STATE_PLAYER);
+            this.setState(MyGame.STATE_PLAYER);
         }
 
         column.highlightOff();
@@ -68,20 +100,19 @@ Board.prototype = {
     },
 
     startDragUnit: function() {
-        MyGame().setState(MyGame.STATE_DRAG);
+        this.setState(MyGame.STATE_DRAG);
     },
 
     /*stop move after drag&drop and after reinforcement call*/
     stopMoveUnit: function() {
-        var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_MOVE) {
+        if (this.getState() === MyGame.STATE_MOVE) {
             if (--this.unitsToMoveCount == 0) {
 
                 this.startFlow();
             }
-        } else if (myGame.getState() == MyGame.STATE_REINF_MOVE) {
+        } else if (this.getState() === MyGame.STATE_REINF_MOVE) {
             if (--this.unitsToMoveCount == 0) {
-                myGame.setState(MyGame.STATE_PLAYER);
+                this.setState(MyGame.STATE_PLAYER);
                 this.reinforcementButton.setLabel(this.getUnitsToCallCount());
             }
         }
@@ -101,7 +132,7 @@ Board.prototype = {
     endFlow: function() {
         console.log('end flow');
         Util.debugUnits(this.columns);
-        myGame.setState(MyGame.STATE_PLAYER);
+        this.setState(MyGame.STATE_PLAYER);
 
         this.reinforcementButton.setLabel(this.getUnitsToCallCount());
     },
@@ -202,16 +233,15 @@ Board.prototype = {
     unitClick: function(unit) {
         //console.log(unit.getTilePosition());
 
-        var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_KILL) {
+        if (this.getState() === MyGame.STATE_KILL) {
 
             var column = this.columns[unit.getTilePosition().column];
             this.unitsToMoveCount = column.unitKilled(unit);
             if (this.unitsToMoveCount == 0) {
-                myGame.setState(MyGame.STATE_PLAYER);
+                this.setState(MyGame.STATE_PLAYER);
                 this.reinforcementButton.setLabel(this.getUnitsToCallCount());
             } else {
-                myGame.setState(MyGame.STATE_MOVE);
+                this.setState(MyGame.STATE_MOVE);
             }
         }
     },
@@ -231,9 +261,8 @@ Board.prototype = {
     },
 
     initReinforcements: function() {
-        var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_PLAYER && this.getUnitsToCallCount() > 0) {
-            myGame.setState(MyGame.STATE_REINF);
+        if (this.getState() === MyGame.STATE_PLAYER && this.getUnitsToCallCount() > 0) {
+            this.setState(MyGame.STATE_REINF);
         }
     },
 
@@ -264,15 +293,18 @@ Board.prototype = {
         buttonBmp.ctx.fillStyle = '#ff0000';
         buttonBmp.ctx.fill();
 
-        return new LabelButton(game, 760, this.position.y + 40, buttonBmp, this.getUnitsToCallCount(), this.initReinforcements, this, Phaser.Keyboard.SPACEBAR);
+        var posY = this.position.y + 40;
+        if (this.orientation === Board.ORIENTATION_LOWER) {
+            posY -= 400;
+        }
+        return new LabelButton(game, 760, posY, buttonBmp, this.getUnitsToCallCount(), this.initReinforcements, this, Phaser.Keyboard.SPACEBAR);
     },
 
     setKillState: function() {
-        var myGame = MyGame();
-        if (myGame.getState() == MyGame.STATE_PLAYER) {
-            myGame.setState(MyGame.STATE_KILL);
-        } else if (myGame.getState() == MyGame.STATE_KILL) {
-            myGame.setState(MyGame.STATE_PLAYER);
+        if (this.getState() === MyGame.STATE_PLAYER) {
+            this.setState(MyGame.STATE_KILL);
+        } else if (this.getState() === MyGame.STATE_KILL) {
+            this.setState(MyGame.STATE_PLAYER);
         }
     },
 
@@ -284,6 +316,10 @@ Board.prototype = {
         buttonBmp.ctx.fillStyle = '#ffff00';
         buttonBmp.ctx.fill();
 
-        return new LabelButton(game, 760, this.position.y + 120, buttonBmp, 'kill', this.setKillState, this, Phaser.Keyboard.CONTROL);
+        var posY = this.position.y + 120;
+        if (this.orientation === Board.ORIENTATION_LOWER) {
+            posY -= 400;
+        }
+        return new LabelButton(game, 760, posY, buttonBmp, 'kill', this.setKillState, this, Phaser.Keyboard.CONTROL);
     }
 };
